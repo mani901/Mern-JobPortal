@@ -12,3 +12,4 @@ yarn.lock
 
 # OS files
 .DS_Store
+.env

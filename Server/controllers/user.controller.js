@@ -12,7 +12,6 @@ export const register = async (req, res) => {
             });
         }
 
-
         const user = await User.findOne({ email });
         if (user) {
             return res.status(400).json({
@@ -58,7 +57,8 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
     try {
         const { email, password, role } = req.body;
-        let user = await User.findOne({ email });
+        //console.log(email)
+        let user = await User.findOne({ email }).populate('companies');
         if (!user) {
             return res.status(400).json({
                 message: "invalid Credentials",
@@ -80,21 +80,23 @@ export const login = async (req, res) => {
         }
 
         const tokenData = {
-            userid: user._id
+            userid: user._id,
+            company: user.companies.map(c => c.name)
         }
-        user = {
+        const userResponse = {
             _id: user._id,
             fullname: user.fullname,
             email: user.email,
             phoneNumber: user.phoneNumber,
             role: user.role,
-            profile: user.profile
+            profile: user.profile,
+            companies: user.companies
         }
-        const token = await jwt.sign(tokenData, process.env.SECRET_KEY, { expiresIn: "1d" });
-        return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpsOnly: true, sameSite: 'strict' }).json({
+        const token = await jwt.sign(tokenData, process.env.JWT_SECRET, { expiresIn: "1d" });
+        return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'lax' }).json({
             message: `Welcome back ${user.fullname}`,
             success: "true",
-            user
+            user: userResponse
         })
     } catch (error) {
         console.log(error)
@@ -125,6 +127,41 @@ export const logOut = async (req, res) => {
     }
 }
 
+
+export const getProfile = async (req, res) => {
+    try {
+        const userId = req.id; // From isAuthenticated middleware
+        
+        const user = await User.findById(userId).populate('companies').select("-password");
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+                success: "false"
+            });
+        }
+
+        return res.status(200).json({
+            message: "Profile fetched successfully",
+            success: "true",
+            user: {
+                _id: user._id,
+                fullname: user.fullname,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                role: user.role,
+                profile: user.profile,
+                companies: user.companies
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            message: "Something went wrong",
+            success: "false"
+        });
+    }
+};
+
 export const updateProfile = async (req, res) => {
     try {
         const { fullname, email, phoneNumber, bio, skills } = req.body
@@ -139,7 +176,7 @@ export const updateProfile = async (req, res) => {
         }
 
         const userid = req.id;
-        let user = await user.findById(userid);
+        let user = await User.findById(userid);
         if (!user) {
             return res.status(404).json({
                 message: "User Not Found",

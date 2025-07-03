@@ -3,23 +3,50 @@ import { Job } from '../models/job.model.js';
 import AppError from '../utils/AppError.js';
 import logger from '../utils/logger.js';
 
+import { Company } from '../models/company.model.js';
+import { User } from '../models/user.model.js';
+
 export const createJob = async (req, res, next) => {
+    const { title, description, requirements, location, salary, companyId, jobType, position } = req.body;
+    
+    const recruiterId = req.user._id;
+
+    if (!companyId) {
+        return next(new AppError('Company ID is required', 400));
+    }
+
     try {
+        const recruiter = await User.findById(recruiterId);
+        if (!recruiter.companies.includes(companyId)) {
+            return next(new AppError('You are not authorized to post jobs for this company', 403));
+        }
+
+        const company = await Company.findById(companyId);
+        if (!company) {
+            return next(new AppError('Company not found', 404));
+        }
+
         const job = await Job.create({
-            ...req.body,
-            company: req.user.company,
-            createdBy: req.user._id
+            title,
+            description,
+            requirements,
+            location,
+            salary,
+            companyId,
+            jobType,
+            position,
+            createdBy: recruiterId
         });
+       
 
-        logger.info(`New job created: ${job._id} by company: ${req.user.company}`);
-
-        res.status(StatusCodes.CREATED).json({
+        res.status(201).json({
             success: true,
-            data: job
+            message: "Job created successfully",
+            job
         });
     } catch (error) {
-        logger.error('Error creating job:', error);
-        next(new AppError('Failed to create job', StatusCodes.BAD_REQUEST));
+        console.log(error);
+        return next(new AppError('Error creating job', 500));
     }
 };
 
@@ -32,7 +59,7 @@ export const getAllJobs = async (req, res, next) => {
             .sort(sort)
             .skip(skip)
             .limit(limit)
-            .populate('company', 'name logo')
+            .populate('companyId', 'name logo')
             .populate('createdBy', 'fullname email');
 
         const total = await Job.countDocuments();
@@ -53,9 +80,10 @@ export const getAllJobs = async (req, res, next) => {
 };
 
 export const getJobById = async (req, res, next) => {
+
     try {
-        const job = await Job.findById(req.params.id)
-            .populate('company', 'name logo description')
+       const job = await Job.findById(req.params.jobId)
+            .populate('companyId', 'name logo description')
             .populate('createdBy', 'fullname email');
 
         if (!job) {
@@ -74,24 +102,24 @@ export const getJobById = async (req, res, next) => {
 
 export const updateJob = async (req, res, next) => {
     try {
-        const job = await Job.findById(req.params.id);
+        const job = await Job.findById(req.params.jobId);
 
         if (!job) {
             return next(new AppError('Job not found', StatusCodes.NOT_FOUND));
         }
 
-        if (job.company.toString() !== req.user.company.toString()) {
+        if (job.companyId.toString() !== req.user.companies[0]._id.toString()) {
             return next(new AppError('Not authorized to update this job', StatusCodes.FORBIDDEN));
         }
 
         const updatedJob = await Job.findByIdAndUpdate(
-            req.params.id,
+           req.params.jobId,
             req.body,
             { new: true, runValidators: true }
-        ).populate('company', 'name logo')
+        ).populate('companyId', 'name logo')
             .populate('createdBy', 'fullname email');
 
-        logger.info(`Job updated: ${updatedJob._id} by company: ${req.user.company}`);
+        logger.info(`Job updated: ${updatedJob._id} by company: ${req.user.companies[0]._id}`);
 
         res.status(StatusCodes.OK).json({
             success: true,
@@ -111,13 +139,13 @@ export const deleteJob = async (req, res, next) => {
             return next(new AppError('Job not found', StatusCodes.NOT_FOUND));
         }
 
-        if (job.company.toString() !== req.user.company.toString()) {
+        if (job.companyId.toString() !== req.user.companies[0]._id.toString()) {
             return next(new AppError('Not authorized to delete this job', StatusCodes.FORBIDDEN));
         }
 
         await job.deleteOne();
 
-        logger.info(`Job deleted: ${job._id} by company: ${req.user.company}`);
+        logger.info(`Job deleted: ${job._id} by company: ${req.user.companies[0]._id}`);
 
         res.status(StatusCodes.OK).json({
             success: true,
@@ -153,7 +181,7 @@ export const searchJobs = async (req, res, next) => {
         }
 
         const jobs = await Job.find(query)
-            .populate('company', 'name logo')
+            .populate('companyId', 'name logo')
             .populate('createdBy', 'fullname email')
             .sort('-createdAt');
 
@@ -169,7 +197,7 @@ export const searchJobs = async (req, res, next) => {
 
 export const getJobsByCompany = async (req, res, next) => {
     try {
-        const jobs = await Job.find({ company: req.user.company })
+        const jobs = await Job.find({ companyId: req.user.companies[0]._id })
             .populate('createdBy', 'fullname email')
             .sort('-createdAt');
 

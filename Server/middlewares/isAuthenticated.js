@@ -10,7 +10,7 @@ const isAuthenticated = (req, res, next) => {
             });
         }
 
-        const decode = jwt.verify(token, process.env.SECRET_KEY);
+        const decode = jwt.verify(token, process.env.JWT_SECRET);
 
         if (!decode.userid) {
             return res.status(401).json({

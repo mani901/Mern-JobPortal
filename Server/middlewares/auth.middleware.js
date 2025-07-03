@@ -22,10 +22,8 @@ export const authenticateUser = async (req, res, next) => {
 
         // Verify token
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-        // Get user
-        const user = await User.findById(decoded.id).select('-password');
-
+        const user = await User.findById(decoded.userid).populate('companies').select('-password');
+console.log(user);
         if (!user) {
             return next(new AppError('User not found', StatusCodes.NOT_FOUND));
         }
