@@ -13,3 +13,12 @@ export const createJob = (jobData) => {
 export const getJobById = (jobId) => {
   return axiosInstance.get(`/api/v1/jobs/details/${jobId}`);
 };
+
+
+export const getJobsByCompany = ()=>{
+  return axiosInstance.get("/api/v1/jobs/company/my-jobs");
+}
+
+export const deleteJob = (id)=>{
+  return axiosInstance.delete(`/api/v1/jobs/delete/${id}`);
+}

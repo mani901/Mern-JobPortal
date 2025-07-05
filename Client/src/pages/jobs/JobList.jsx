@@ -28,16 +28,18 @@ const JobList = () => {
         "Failed to fetch jobs. Please try again.";
       showError("Error Loading Jobs", errorMessage);
     }
-  }, [error, showError]);
+  }, [error]);
 
   return (
-    <div>
-      <div className="grid grid-cols-5 grid-rows-5 gap-4 mt-10 mb-8">
-        <div className="row-span-5">
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Sidebar - appears first on mobile, then on the left on desktop */}
+        <div className="w-full lg:w-1/4 xl:w-1/5">
           <JobFilterSidebar />
         </div>
 
-        <div className="col-span-4 row-span-5">
+        {/* Main content area */}
+        <div className="w-full lg:w-3/4 xl:w-4/5">
           {loading ? (
             <div className="flex items-center justify-center h-64">
               <LoadingSpinner />
@@ -56,46 +58,50 @@ const JobList = () => {
             </div>
           ) : jobs && jobs.length > 0 ? (
             <>
-              {jobs.map((job) => (
-                <JobCard
-                  key={job._id || job.id}
-                  jobId={job._id || job.id}
-                  title={job.title}
-                  company={
-                    job.companyId?.name ||
-                    job.company?.name ||
-                    job.companyName ||
-                    "Unknown Company"
-                  }
-                  category={job.category || "Technology"}
-                  type={job.jobType || job.type}
-                  salary={job.salary ? `$${job.salary}` : "Competitive"}
-                  location={job.location}
-                  timeAgo={
-                    job.createdAt
-                      ? new Date(job.createdAt).toLocaleDateString()
-                      : "Recently"
-                  }
-                  job={job}
-                />
-              ))}
+              <div className="space-y-4">
+                {jobs.map((job) => (
+                  <JobCard
+                    key={job._id || job.id}
+                    jobId={job._id || job.id}
+                    title={job.title}
+                    company={
+                      job.companyId?.name ||
+                      job.company?.name ||
+                      job.companyName ||
+                      "Unknown Company"
+                    }
+                    category={job.category || "Technology"}
+                    type={job.jobType || job.type}
+                    salary={job.salary ? `$${job.salary}` : "Competitive"}
+                    location={job.location}
+                    timeAgo={
+                      job.createdAt
+                        ? new Date(job.createdAt).toLocaleDateString()
+                        : "Recently"
+                    }
+                    job={job}
+                  />
+                ))}
+              </div>
 
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious href="#" />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink href="#">1</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationNext href="#" />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+              <div className="mt-8">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious href="#" />
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationLink href="#">1</PaginationLink>
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationNext href="#" />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
             </>
           ) : (
             <div className="flex items-center justify-center h-64">

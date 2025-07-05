@@ -21,6 +21,8 @@ import NotFound from "@/pages/NotFound";
 // Import route protection
 import PrivateRoute from "@/components/common/PrivateRoute";
 import PublicRoute from "@/components/common/PublicRoute";
+import AppliedJobsList from "@/pages/applications/AppliedJobsList";
+import JobsPosted from "@/components/jobs/recruiter/JobsPosted";
 
 function App() {
   return (
@@ -55,13 +57,13 @@ function App() {
             path="/my-applications"
             element={
               <PrivateRoute>
-                <ApplicationPage />
+                <AppliedJobsList />
               </PrivateRoute>
             }
           />
 
           <Route
-            path="/create-company"
+            path="/company/create-company"
             element={
               <PrivateRoute>
                 <CompanyRegister />
@@ -70,7 +72,16 @@ function App() {
           />
 
           <Route
-            path="/create-job"
+            path="/company/manage-jobs"
+            element={
+              <PrivateRoute>
+                <JobsPosted />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/company/create-job"
             element={
               <PrivateRoute>
                 <CreateJob />

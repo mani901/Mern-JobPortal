@@ -11,7 +11,6 @@ const Home = () => {
   return (
     <>
       <HeroSection />
-
       <JobCard
         title="Forward Security Director"
         company="Bauck, Schuppe and Schulist Co"

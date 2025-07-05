@@ -6,46 +6,63 @@ import logger from '../utils/logger.js';
 import { sendApplicationNotification, sendApplicationStatusUpdate } from '../utils/email.js';
 
 export const applyForJob = async (req, res, next) => {
+    console.log('🚀 Starting applyForJob function');
     try {
+       
+
         const { jobId, coverLetter } = req.body;
         const userId = req.user._id;
 
-        // Check if job exists
-        const job = await Job.findById(jobId).populate('company', 'name email');
+        
+
+       
+        const job = await Job.findById(jobId).populate('companyId', 'name email');
+       
         if (!job) {
+           
             return next(new AppError('Job not found', StatusCodes.NOT_FOUND));
         }
 
-        // Check if user has already applied
+       
+        
         const existingApplication = await Application.findOne({
             job: jobId,
             applicant: userId
         });
+     
 
         if (existingApplication) {
+           
             return next(new AppError('You have already applied for this job', StatusCodes.BAD_REQUEST));
         }
 
+        console.log('📝 Creating new application...');
         const application = await Application.create({
             job: jobId,
             applicant: userId,
             coverLetter
         });
+        
 
-        // Add application to job's applications array
+       
         job.applications.push(application._id);
         await job.save();
+        console.log('✅ Job updated with application');
 
         // Send email notification
-        await sendApplicationNotification(application, job, req.user);
+        //console.log('📧 Sending email notification...');
+       // await sendApplicationNotification(application, job, req.user);
+       
 
-        logger.info(`New application created: ${application._id} for job: ${jobId}`);
+        //logger.info(`New application created: ${application._id} for job: ${jobId}`);
 
+        
         res.status(StatusCodes.CREATED).json({
             success: true,
             data: application
         });
     } catch (error) {
+      
         logger.error('Error creating application:', error);
         next(new AppError('Failed to create application', StatusCodes.BAD_REQUEST));
     }
@@ -58,17 +75,19 @@ export const getApplicationsByUser = async (req, res, next) => {
                 path: 'job',
                 select: 'title company location',
                 populate: {
-                    path: 'company',
+                    path: 'companyId',
                     select: 'name logo'
                 }
             })
             .sort('-createdAt');
+            console.log(applications);
 
         res.status(StatusCodes.OK).json({
             success: true,
             data: applications
         });
     } catch (error) {
+        console.error('Error fetching user applications:', error.message);
         logger.error('Error fetching user applications:', error);
         next(new AppError('Failed to fetch applications', StatusCodes.INTERNAL_SERVER_ERROR));
     }

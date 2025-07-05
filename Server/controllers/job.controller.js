@@ -8,7 +8,7 @@ import { User } from '../models/user.model.js';
 
 export const createJob = async (req, res, next) => {
     const { title, description, requirements, location, salary, companyId, jobType, position } = req.body;
-    
+
     const recruiterId = req.user._id;
 
     if (!companyId) {
@@ -37,7 +37,7 @@ export const createJob = async (req, res, next) => {
             position,
             createdBy: recruiterId
         });
-       
+
 
         res.status(201).json({
             success: true,
@@ -82,7 +82,7 @@ export const getAllJobs = async (req, res, next) => {
 export const getJobById = async (req, res, next) => {
 
     try {
-       const job = await Job.findById(req.params.jobId)
+        const job = await Job.findById(req.params.jobId)
             .populate('companyId', 'name logo description')
             .populate('createdBy', 'fullname email');
 
@@ -113,7 +113,7 @@ export const updateJob = async (req, res, next) => {
         }
 
         const updatedJob = await Job.findByIdAndUpdate(
-           req.params.jobId,
+            req.params.jobId,
             req.body,
             { new: true, runValidators: true }
         ).populate('companyId', 'name logo')
@@ -143,9 +143,16 @@ export const deleteJob = async (req, res, next) => {
             return next(new AppError('Not authorized to delete this job', StatusCodes.FORBIDDEN));
         }
 
+        // Delete all applications for this job first
+        const { Application } = await import('../models/application.model.js');
+        const deletedApplications = await Application.deleteMany({ job: job._id });
+
+        console.log(`Deleted ${deletedApplications.deletedCount} applications for job ${job._id}`);
+
+        // Then delete the job
         await job.deleteOne();
 
-        logger.info(`Job deleted: ${job._id} by company: ${req.user.companies[0]._id}`);
+        logger.info(`Job deleted: ${job._id} with ${deletedApplications.deletedCount} applications by company: ${req.user.companies[0]._id}`);
 
         res.status(StatusCodes.OK).json({
             success: true,

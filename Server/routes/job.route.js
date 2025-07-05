@@ -23,7 +23,7 @@ router.get('/details/:jobId', getJobById);
 // Protected routes
 router.post('/create-job', authenticateUser,upload.none(), authorizeRoles('recruiter'), createJob);
 router.put('/:id', authenticateUser, authorizeRoles('recruiter'), updateJob);
-router.delete('/:id', authenticateUser, authorizeRoles('recruiter'), deleteJob);
+router.delete('/delete/:id', authenticateUser, authorizeRoles('recruiter'), deleteJob);
 router.get('/company/my-jobs', authenticateUser, authorizeRoles('recruiter'), getJobsByCompany);
 
 export default router; 

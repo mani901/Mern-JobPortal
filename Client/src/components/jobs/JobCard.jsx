@@ -28,6 +28,13 @@ const JobCard = ({
     timeAgo,
   };
 
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+
   return (
     <div className="bg-white rounded-xl shadow-sm p-5 border border-gray-100 hover:shadow-lg transition-all duration-300 group hover:border-green-100 mb-2">
       <div className="flex items-start gap-4">
@@ -46,7 +53,7 @@ const JobCard = ({
               <p className="text-sm font-medium text-gray-700">{company}</p>
             </div>
             <span className="text-xs font-medium bg-green-50 text-green-700 px-2 py-1 rounded-full">
-              {timeAgo}
+              {formatDate(timeAgo)}
             </span>
           </div>
 

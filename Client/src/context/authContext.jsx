@@ -23,11 +23,11 @@ export function AuthProvider({ children }) {
     try {
       setLoading(true);
 
-      // Call your backend to verify the cookie and get user data
       const response = await axiosInstance.get("/api/v1/user/profile");
 
       if (response.data.success === "true") {
         setUser(response.data.user);
+        console.log(user);
       } else {
         setUser(null);
       }
@@ -133,7 +133,7 @@ export function AuthProvider({ children }) {
       }
     },
     []
-  ); // No dependencies
+  );
 
   // Memoized isAuthenticated value
   const isAuthenticated = useMemo(() => !!user, [user]);
@@ -155,7 +155,6 @@ export function AuthProvider({ children }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Custom hook to use auth context
 export function useAuth() {
   const context = useContext(AuthContext);
 

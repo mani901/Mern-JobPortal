@@ -18,16 +18,13 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import useToastNotification from "@/components/common/Toast";
 
 const JobDetailsPage = () => {
-  const { jobId } = useParams(); // Get jobId from URL params (route is /jobs/:jobId)
+  const { jobId } = useParams();
   const { showError } = useToastNotification();
 
-  // Create a function that calls getJobById with the jobId
   const fetchJobById = () => getJobById(jobId);
 
-  // Use useFetch hook with the fetch function
   const { data: response, loading, error } = useFetch(fetchJobById, [jobId]);
 
-  // Extract job from response
   const job = response?.data;
 
   // Debug logging
@@ -38,10 +35,12 @@ const JobDetailsPage = () => {
   // Show error toast when there's an error
   useEffect(() => {
     if (error) {
-      const errorMessage = error.response?.data?.message || "Failed to fetch job details. Please try again.";
+      const errorMessage =
+        error.response?.data?.message ||
+        "Failed to fetch job details. Please try again.";
       showError("Error Loading Job", errorMessage);
     }
-  }, [error, showError]);
+  }, [error]);
 
   // Loading state
   if (loading) {
@@ -60,7 +59,9 @@ const JobDetailsPage = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
-            <p className="text-gray-500 text-lg mb-4">Failed to load job details</p>
+            <p className="text-gray-500 text-lg mb-4">
+              Failed to load job details
+            </p>
             <button
               onClick={() => window.location.reload()}
               className="text-green-600 hover:text-green-800 underline"
@@ -80,7 +81,9 @@ const JobDetailsPage = () => {
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <p className="text-gray-500 text-lg mb-2">Job not found</p>
-            <p className="text-gray-400 text-sm">The job you're looking for doesn't exist or has been removed.</p>
+            <p className="text-gray-400 text-sm">
+              The job you're looking for doesn't exist or has been removed.
+            </p>
           </div>
         </div>
       </div>
@@ -116,11 +119,15 @@ const JobDetailsPage = () => {
                   <div className="flex items-center mt-2 space-x-4">
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Briefcase className="h-4 w-4 mr-1" />
-                      {job.companyId?.name || job.company?.name || "Unknown Company"}
+                      {job.companyId?.name ||
+                        job.company?.name ||
+                        "Unknown Company"}
                     </div>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4 mr-1" />
-                      {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "Recently"}
+                      {job.createdAt
+                        ? new Date(job.createdAt).toLocaleDateString()
+                        : "Recently"}
                     </div>
                   </div>
                 </div>
@@ -138,7 +145,11 @@ const JobDetailsPage = () => {
                     <div>
                       <p className="text-sm text-muted-foreground">Salary</p>
                       <p className="font-medium">
-                        ${job.salary ? job.salary.toLocaleString() : "Competitive"}/year
+                        $
+                        {job.salary
+                          ? job.salary.toLocaleString()
+                          : "Competitive"}
+                        /year
                       </p>
                     </div>
                   </div>
@@ -146,7 +157,9 @@ const JobDetailsPage = () => {
                     <MapPin className="h-5 w-5 text-muted-foreground" />
                     <div>
                       <p className="text-sm text-muted-foreground">Location</p>
-                      <p className="font-medium">{job.location || "Not specified"}</p>
+                      <p className="font-medium">
+                        {job.location || "Not specified"}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -197,7 +210,7 @@ const JobDetailsPage = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-4">
                 <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
-                  {(job.companyId?.logo || job.company?.logo) ? (
+                  {job.companyId?.logo || job.company?.logo ? (
                     <img
                       src={job.companyId?.logo || job.company?.logo}
                       alt={`${job.companyId?.name || job.company?.name} logo`}
@@ -205,14 +218,22 @@ const JobDetailsPage = () => {
                     />
                   ) : (
                     <span className="text-lg font-medium">
-                      {(job.companyId?.name || job.company?.name || "C").charAt(0)}
+                      {(job.companyId?.name || job.company?.name || "C").charAt(
+                        0
+                      )}
                     </span>
                   )}
                 </div>
                 <div>
-                  <h4 className="font-medium">{job.companyId?.name || job.company?.name || "Unknown Company"}</h4>
+                  <h4 className="font-medium">
+                    {job.companyId?.name ||
+                      job.company?.name ||
+                      "Unknown Company"}
+                  </h4>
                   <p className="text-sm text-muted-foreground">
-                    {job.companyId?.description || job.company?.description || "No company description available."}
+                    {job.companyId?.description ||
+                      job.company?.description ||
+                      "No company description available."}
                   </p>
                 </div>
               </div>
@@ -240,7 +261,9 @@ const JobDetailsPage = () => {
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex justify-between">
-                <span className="text-sm text-muted-foreground">Applications</span>
+                <span className="text-sm text-muted-foreground">
+                  Applications
+                </span>
                 <span className="text-sm font-medium">
                   {job.applications?.length || 0}
                 </span>
@@ -248,12 +271,16 @@ const JobDetailsPage = () => {
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Posted</span>
                 <span className="text-sm font-medium">
-                  {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "Recently"}
+                  {job.createdAt
+                    ? new Date(job.createdAt).toLocaleDateString()
+                    : "Recently"}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Type</span>
-                <span className="text-sm font-medium">{job.jobType || "Not specified"}</span>
+                <span className="text-sm font-medium">
+                  {job.jobType || "Not specified"}
+                </span>
               </div>
             </CardContent>
           </Card>

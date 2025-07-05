@@ -1,7 +1,9 @@
-import { useState, useMemo, useCallback } from "react";
+"use client";
+
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/authContext";
-import { Menu, X } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -12,11 +14,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { ChevronDown, Menu, User } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-// Static data moved outside component to prevent recreation on each render
 const NAVIGATION_ITEMS = [
   { path: "/jobs", label: "Find Jobs" },
   { path: "/companies", label: "Companies" },
+  { path: "/company/create-company", label: "Create Company" },
+  { path: "/company/manage-jobs", label: "Manage Jobs" },
+  { path: "/company/create-job", label: "Create Job" },
   { path: "/about", label: "About" },
 ];
 
@@ -26,281 +33,354 @@ const USER_MENU_ITEMS = [
   { path: "/settings", label: "Settings" },
 ];
 
-// Style constants to prevent recreation
-const STYLES = {
-  link: "text-gray-600 hover:text-green-800 transition-colors duration-200",
-  container: "container mx-auto px-4 py-4 flex items-center justify-between",
-  mobileMenu: "md:hidden bg-white border-t border-gray-200",
-  loadingSkeleton: "h-8 w-16 animate-pulse bg-gray-200 rounded",
+// Hover Dropdown
+const NavDropdown = ({ trigger, children, className }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const timeoutRef = useRef();
+
+  const handleMouseEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setIsOpen(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => setIsOpen(false), 150);
+  };
+
+  useEffect(() => {
+    return () => timeoutRef.current && clearTimeout(timeoutRef.current);
+  }, []);
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <div
+        className={cn(
+          "flex items-center space-x-1 px-4 py-2 text-gray-600 hover:text-gray-900 cursor-pointer transition-colors",
+          isOpen && "text-gray-900",
+          className
+        )}
+      >
+        {trigger}
+        <ChevronDown
+          className={cn(
+            "w-4 h-4 transition-transform duration-200",
+            isOpen && "rotate-180"
+          )}
+        />
+      </div>
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50 animate-in fade-in-0 zoom-in-95">
+          {children}
+        </div>
+      )}
+    </div>
+  );
 };
 
-const Navbar = () => {
+export default function Navbar() {
   const navigate = useNavigate();
   const { user, isAuthenticated, loading, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [expandedMobileSection, setExpandedMobileSection] = useState(null);
 
-  // Memoized callbacks to prevent recreation on each render
-  const toggleMobileMenu = useCallback(() => {
-    setIsMobileMenuOpen((prev) => !prev);
-  }, []);
-
-  const closeMobileMenu = useCallback(() => {
-    setIsMobileMenuOpen(false);
-  }, []);
-
-  // Unified navigation handler with error handling
-  const handleNavigation = useCallback(
-    (path) => {
-      try {
-        navigate(path);
-        closeMobileMenu();
-      } catch (error) {
-        console.error("Navigation error:", error);
-      }
-    },
-    [navigate, closeMobileMenu]
-  );
-
-  // Handle logout with proper error handling
-  const handleLogout = useCallback(async () => {
-    try {
-      await logout();
-      closeMobileMenu();
-      navigate("/");
-    } catch (error) {
-      console.error("Logout error:", error);
-      // Still navigate to home even if logout API fails
-      navigate("/");
-    }
-  }, [logout, navigate, closeMobileMenu]);
-
-  // Memoized navigation links component
-  const NavigationLinks = useMemo(
-    () =>
-      NAVIGATION_ITEMS.map((item) => (
-        <button
-          key={item.path}
-          onClick={() => handleNavigation(item.path)}
-          className={STYLES.link}
-          type="button"
-          aria-label={`Navigate to ${item.label}`}
-        >
-          {item.label}
-        </button>
-      )),
-    [handleNavigation]
-  );
-
-  // Memoized mobile navigation links
-  const MobileNavigationLinks = useMemo(
-    () =>
-      NAVIGATION_ITEMS.map((item) => (
-        <button
-          key={`mobile-${item.path}`}
-          onClick={() => handleNavigation(item.path)}
-          className={`${STYLES.link} w-full text-left py-2`}
-          type="button"
-          aria-label={`Navigate to ${item.label}`}
-        >
-          {item.label}
-        </button>
-      )),
-    [handleNavigation]
-  );
-
-  // Memoized user initials for avatar fallback
   const userInitials = useMemo(() => {
     if (!user?.fullname) return "U";
     return user.fullname
       .split(" ")
-      .map((name) => name.charAt(0))
+      .map((n) => n[0])
       .join("")
       .toUpperCase()
       .slice(0, 2);
   }, [user?.fullname]);
 
-  // Memoized authentication section
-  const AuthenticationSection = useMemo(() => {
-    // Show loading skeleton while checking authentication
-    if (loading) {
-      return (
-        <div className="flex items-center justify-center">
-          <div className={STYLES.loadingSkeleton} aria-label="Loading authentication status" />
-        </div>
-      );
+  const handleNavigation = (path) => {
+    try {
+      navigate(path);
+      setIsMobileMenuOpen(false);
+    } catch (err) {
+      console.error("Navigation error:", err);
     }
+  };
 
-    // Authenticated user - show user menu
-    if (isAuthenticated && user) {
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src={user.profile?.profilePhoto || ""} alt={user.fullname} />
-                <AvatarFallback className="bg-green-100 text-green-700">
-                  {userInitials}
-                </AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user.fullname}</p>
-                <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
-              </div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {USER_MENU_ITEMS.map((item) => (
-              <DropdownMenuItem
-                key={item.path}
-                onClick={() => handleNavigation(item.path)}
-                className="cursor-pointer"
-              >
-                {item.label}
-              </DropdownMenuItem>
-            ))}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600">
-              Logout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setIsMobileMenuOpen(false);
+      navigate("/");
+    } catch (err) {
+      console.error("Logout error:", err);
+      navigate("/");
     }
+  };
 
-    // Not authenticated - show login/signup buttons
-    return (
-      <div className="flex items-center space-x-3">
-        <Button
-          variant="ghost"
-          onClick={() => handleNavigation("/login")}
-          className={STYLES.link}
-        >
-          Log In
-        </Button>
-        <Button
-          onClick={() => handleNavigation("/register")}
-          className="bg-green-900 hover:bg-green-800 text-white"
-        >
-          Sign Up
-        </Button>
-      </div>
-    );
-  }, [loading, isAuthenticated, user, userInitials, handleNavigation, handleLogout]);
-
-  // Memoized mobile authentication section
-  const MobileAuthenticationSection = useMemo(() => {
-    if (loading) {
-      return (
-        <div className="flex justify-center py-2">
-          <div className={STYLES.loadingSkeleton} />
-        </div>
-      );
-    }
-
-    if (isAuthenticated && user) {
-      return (
-        <div className="flex flex-col space-y-2 pt-4 border-t">
-          <div className="flex items-center space-x-3 py-2">
-            <Avatar className="h-8 w-8">
-              <AvatarImage src={user.profile?.profilePhoto || ""} alt={user.fullname} />
-              <AvatarFallback className="bg-green-100 text-green-700">
-                {userInitials}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="text-sm font-medium">{user.fullname}</p>
-              <p className="text-xs text-muted-foreground">{user.email}</p>
-            </div>
-          </div>
-          {USER_MENU_ITEMS.map((item) => (
-            <button
-              key={`mobile-user-${item.path}`}
-              onClick={() => handleNavigation(item.path)}
-              className={`${STYLES.link} w-full text-left py-2`}
-              type="button"
-            >
-              {item.label}
-            </button>
-          ))}
-          <button
-            onClick={handleLogout}
-            className="w-full text-left py-2 text-red-600 hover:text-red-800 transition-colors"
-            type="button"
-          >
-            Logout
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex flex-col space-y-2 pt-4 border-t">
-        <Button
-          variant="ghost"
-          onClick={() => handleNavigation("/login")}
-          className="w-full justify-start"
-        >
-          Log In
-        </Button>
-        <Button
-          onClick={() => handleNavigation("/register")}
-          className="w-full bg-green-900 hover:bg-green-800 text-white"
-        >
-          Sign Up
-        </Button>
-      </div>
-    );
-  }, [loading, isAuthenticated, user, userInitials, handleNavigation, handleLogout]);
+  const jobsItems = NAVIGATION_ITEMS.filter(
+    (item) => item.path.includes("/jobs") || item.label.includes("Jobs")
+  );
+  const companyItems = NAVIGATION_ITEMS.filter(
+    (item) => item.path.includes("/company") || item.label.includes("Company")
+  );
+  const otherItems = NAVIGATION_ITEMS.filter(
+    (item) => !item.path.includes("/jobs") && !item.path.includes("/company")
+  );
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50" role="navigation" aria-label="Main navigation">
-      <div className={STYLES.container}>
-        {/* Logo */}
-        <button
-          onClick={() => handleNavigation("/")}
-          className="text-xl font-bold text-gray-900 hover:text-green-800 transition-colors"
-          type="button"
-          aria-label="Go to homepage"
-        >
-          JobPortal
-        </button>
+    <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-50">
+      <div className="container mx-auto px-4">
+        <div className="flex h-20 items-center justify-between">
+          {/* Logo */}
+          <button
+            onClick={() => handleNavigation("/")}
+            className="flex items-center space-x-3 hover:opacity-80 transition-opacity"
+          >
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500 text-white">
+              <User className="h-6 w-6" />
+            </div>
+            <span className="text-2xl font-bold text-gray-900">JobPortal</span>
+          </button>
 
-        {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center space-x-6">
-          {NavigationLinks}
-          {AuthenticationSection}
-        </div>
+          {/* Desktop Nav */}
+          <nav className="hidden lg:flex items-center space-x-8">
+            <NavDropdown
+              trigger={<span className="font-medium">Find Jobs</span>}
+            >
+              <div className="py-2">
+                {jobsItems.map((item) => (
+                  <button
+                    key={item.path}
+                    onClick={() => handleNavigation(item.path)}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </NavDropdown>
 
-        {/* Mobile Menu Toggle */}
-        <button
-          className="md:hidden p-2 text-gray-600 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 rounded-md"
-          onClick={toggleMobileMenu}
-          aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={isMobileMenuOpen}
-          type="button"
-        >
-          {isMobileMenuOpen ? (
-            <X className="h-6 w-6" aria-hidden="true" />
-          ) : (
-            <Menu className="h-6 w-6" aria-hidden="true" />
-          )}
-        </button>
-      </div>
+            <NavDropdown
+              trigger={<span className="font-medium">Companies</span>}
+            >
+              <div className="py-2">
+                {companyItems.map((item) => (
+                  <button
+                    key={item.path}
+                    onClick={() => handleNavigation(item.path)}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </NavDropdown>
 
-      {/* Mobile Navigation */}
-      {isMobileMenuOpen && (
-        <div className={STYLES.mobileMenu} role="menu">
-          <div className="container mx-auto px-4 py-4 flex flex-col space-y-2">
-            {MobileNavigationLinks}
-            {MobileAuthenticationSection}
+            {otherItems.map((item) => (
+              <button
+                key={item.path}
+                onClick={() => handleNavigation(item.path)}
+                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+
+          {/* Desktop Auth */}
+          <div className="hidden lg:flex items-center space-x-3">
+            {loading ? (
+              <div className="h-8 w-16 animate-pulse bg-gray-200 rounded" />
+            ) : isAuthenticated && user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="relative h-10 w-10 rounded-full"
+                  >
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage
+                        src={user.profile?.profilePhoto || ""}
+                        alt={user.fullname}
+                      />
+                      <AvatarFallback className="bg-emerald-100 text-emerald-700">
+                        {userInitials}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium">{user.fullname}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {USER_MENU_ITEMS.map((item) => (
+                    <DropdownMenuItem
+                      key={item.path}
+                      onClick={() => handleNavigation(item.path)}
+                      className="cursor-pointer"
+                    >
+                      {item.label}
+                    </DropdownMenuItem>
+                  ))}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleLogout}
+                    className="cursor-pointer text-red-600"
+                  >
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => handleNavigation("/login")}
+                  className="border-emerald-500 text-emerald-600 hover:bg-emerald-50 font-medium px-6 bg-transparent"
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Log In
+                </Button>
+                <Button
+                  className="bg-emerald-500 hover:bg-emerald-600 text-white font-medium px-6"
+                  onClick={() => handleNavigation("/register")}
+                >
+                  Sign Up
+                </Button>
+              </>
+            )}
           </div>
-        </div>
-      )}
-    </nav>
-  );
-};
 
-export default Navbar;
+          {/* Mobile Menu */}
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="lg:hidden">
+                <Menu className="h-6 w-6" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[280px] p-0">
+              <div className="flex flex-col h-full">
+                {/* Mobile User Info */}
+                {!loading && isAuthenticated && user && (
+                  <div className="p-6 border-b border-gray-100">
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage
+                          src={user.profile?.profilePhoto || ""}
+                          alt={user.fullname}
+                        />
+                        <AvatarFallback className="bg-emerald-100 text-emerald-700">
+                          {userInitials}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">
+                          {user.fullname}
+                        </p>
+                        <p className="text-xs text-gray-500">{user.email}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Mobile Links */}
+                <div className="flex-1 py-6 px-6 space-y-1">
+                  {[
+                    ["jobs", jobsItems],
+                    ["companies", companyItems],
+                  ].map(([label, items]) => (
+                    <div key={label} className="py-3 border-b border-gray-100">
+                      <button
+                        onClick={() =>
+                          setExpandedMobileSection((s) =>
+                            s === label ? null : label
+                          )
+                        }
+                        className="flex items-center justify-between w-full text-left text-gray-700 hover:text-gray-900 font-medium"
+                      >
+                        <span>
+                          {label === "jobs" ? "Find Jobs" : "Companies"}
+                        </span>
+                        <ChevronDown
+                          className={cn(
+                            "w-4 h-4 transition-transform",
+                            expandedMobileSection === label && "rotate-180"
+                          )}
+                        />
+                      </button>
+                      {expandedMobileSection === label && (
+                        <div className="mt-2 ml-4 space-y-2">
+                          {items.map((item) => (
+                            <button
+                              key={item.path}
+                              onClick={() => handleNavigation(item.path)}
+                              className="block w-full text-left py-1 text-sm text-gray-600 hover:text-gray-900"
+                            >
+                              {item.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  {otherItems.map((item) => (
+                    <button
+                      key={item.path}
+                      onClick={() => handleNavigation(item.path)}
+                      className="block w-full text-left py-3 text-gray-700 hover:text-gray-900 font-medium border-b border-gray-100"
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                  {!loading && isAuthenticated && user && (
+                    <div className="pt-4 border-t border-gray-100 space-y-1">
+                      {USER_MENU_ITEMS.map((item) => (
+                        <button
+                          key={item.path}
+                          onClick={() => handleNavigation(item.path)}
+                          className="block w-full text-left py-3 text-gray-700 hover:text-gray-900 font-medium border-b border-gray-100"
+                        >
+                          {item.label}
+                        </button>
+                      ))}
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left py-2 text-red-600 hover:text-red-800 transition-colors"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                  {!loading && !isAuthenticated && (
+                    <div className="pt-4 border-t space-y-2">
+                      <Button
+                        variant="ghost"
+                        onClick={() => handleNavigation("/login")}
+                        className="w-full justify-start"
+                      >
+                        Log In
+                      </Button>
+                      <Button
+                        onClick={() => handleNavigation("/register")}
+                        className="w-full bg-emerald-500 hover:bg-emerald-600 text-white"
+                      >
+                        Sign Up
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
+    </header>
+  );
+}

@@ -11,41 +11,71 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import useToastNotification from "@/components/common/Toast";
+import usePost from "@/hooks/usePost";
+import { applyJob } from "@/services/applicationService";
+import { useNavigate } from "react-router-dom";
 
 const ApplyJobPage = ({ job }) => {
-  const [coverLetter, setCoverLetter] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
   const { showSuccess, showError } = useToastNotification();
+  const { execute: submitApplication, loading } = usePost();
+
+  const [formData, setFormData] = useState({
+    coverLetter: "",
+    jobId: job._id,
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
   const handleSubmit = async (e) => {
+    console.log("🎯 Frontend: Form submitted!");
     e.preventDefault();
-    setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Prepare application data for API
+      const applicationData = {
+        coverLetter: formData.coverLetter,
+        jobId: job._id,
+      };
 
-      showSuccess(
-        "Application Submitted!",
-        `Your application for ${job.title} has been submitted successfully.`
-      );
-      setCoverLetter("");
+      console.log("📦 Frontend: Application data being sent to API:", applicationData);
+      console.log("📦 Frontend: Job object:", job);
+
+      console.log("🚀 Frontend: About to call submitApplication...");
+      const response = await submitApplication(() => applyJob(applicationData));
+      console.log("✅ Frontend: Response received:", response);
+
+      showSuccess(response?.message);
       setIsOpen(false);
+      //  navigate("/my-applications");
     } catch (error) {
-      showError(
-        "Application Failed",
-        "Failed to submit your application. Please try again."
-      );
-    } finally {
-      setLoading(false);
+      console.log("💥 Frontend: Error occurred:", error);
+      console.log("💥 Frontend: Error response:", error.response);
+      const errorMessage = error.response?.data?.message;
+      showError("Job Application Failed", errorMessage);
     }
+  };
+
+  const handleApplyClick = () => {
+    console.log("🎯 Frontend: Apply button clicked!");
+    console.log("🎯 Frontend: Job data:", job);
+    setIsOpen(true);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-green-900 hover:bg-green-900/70">Apply</Button>
+        <Button
+          className="bg-green-900 hover:bg-green-900/70"
+          onClick={handleApplyClick}
+        >
+          Apply
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-xl w-full max-h-[90vh] overflow-y-auto rounded-xl px-4 sm:px-8 py-6">
         <DialogHeader>
@@ -62,8 +92,8 @@ const ApplyJobPage = ({ job }) => {
               id="coverLetter"
               name="coverLetter"
               rows={6}
-              value={coverLetter}
-              onChange={(e) => setCoverLetter(e.target.value)}
+              value={formData.coverLetter}
+              onChange={handleChange}
               placeholder="Why are you a good fit for this role?"
               required
               className="resize-none"
