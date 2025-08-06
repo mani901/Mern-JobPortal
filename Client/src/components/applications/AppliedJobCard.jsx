@@ -56,7 +56,7 @@ const AppliedJobCard = ({ application }) => {
             <Clock className="h-3 w-3" />
             <span>Applied</span>
           </Badge>
-          <Badge variant="outline">Pending Review</Badge>
+          <Badge variant="outline">{application.status}</Badge>
         </div>
       </CardContent>
     </Card>

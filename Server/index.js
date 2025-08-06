@@ -14,6 +14,8 @@ import logger from "./utils/logger.js"
 
 dotenv.config({});
 
+
+
 const PORT = process.env.PORT || 8000;
 const app = express();
 
@@ -22,8 +24,8 @@ app.use(helmet());
 app.use(limiter);
 
 // Body parser middleware
-app.use(express.json({ limit: '10kb' }));
-app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
 const corsOption = {
@@ -39,14 +41,7 @@ app.use("/api/v1/company", companyRoute)
 app.use("/api/v1/jobs", jobRoute)
 app.use("/api/v1/applications", applicationRoute)
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.status(200).json({
-        success: true,
-        message: 'Server is healthy',
-        timestamp: new Date().toISOString()
-    });
-});
+
 
 // Error handling middleware
 app.use(errorHandler);

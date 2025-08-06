@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import useFetch from "@/hooks/useFetch";
 import useToastNotification from "@/components/common/Toast";
 import { getJobsByCompany } from "@/services/jobsService";
@@ -14,11 +15,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Trash2 } from "lucide-react";
+import { Trash2, BookText } from "lucide-react";
 import axiosInstance from "@/services/axiosInstance";
 import { set } from "date-fns";
 
 export default function JobsPosted() {
+  const navigate = useNavigate();
   const [refreshKey, setRefreshKey] = useState(false);
   const {
     data: response,
@@ -97,9 +99,9 @@ export default function JobsPosted() {
             <TableRow>
               <TableHead className="font-semibold">Job Title</TableHead>
               <TableHead className="font-semibold">Type</TableHead>
-              <TableHead className="font-semibold">Level</TableHead>
+              <TableHead className="font-semibold">Positions</TableHead>
               <TableHead className="font-semibold">Location</TableHead>
-              <TableHead className="font-semibold">Salary</TableHead>
+              <TableHead className="font-semibold">Applications</TableHead>
               <TableHead className="font-semibold">Posted</TableHead>
               <TableHead className="font-semibold w-20">Action</TableHead>
             </TableRow>
@@ -122,8 +124,15 @@ export default function JobsPosted() {
                   )}
                 </TableCell>
                 <TableCell className="text-gray-600">{job.location}</TableCell>
-                <TableCell className="font-medium text-green-600">
-                  {job.salary ? formatSalary(job.salary) : "Not specified"}
+                <TableCell>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => navigate(`/manage-applicants/${job._id}`)}
+                    className="text-green-700 hover:text-green-900 hover:bg-green-300"
+                  >
+                    <BookText className="w-4 h-4" />
+                  </Button>
                 </TableCell>
                 <TableCell className="text-gray-600">
                   {formatDate(job.createdAt)}

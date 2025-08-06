@@ -23,7 +23,8 @@ import PrivateRoute from "@/components/common/PrivateRoute";
 import PublicRoute from "@/components/common/PublicRoute";
 import AppliedJobsList from "@/pages/applications/AppliedJobsList";
 import JobsPosted from "@/components/jobs/recruiter/JobsPosted";
-
+import JobApplicantsPage from "@/pages/jobs/JobApplicantsPage";
+import UserProfile from "@/pages/user/UserProfile";
 function App() {
   return (
     <div className="App">
@@ -88,11 +89,30 @@ function App() {
               </PrivateRoute>
             }
           />
+
+          <Route
+            path="/manage-applicants/:jobId"
+            element={
+              <PrivateRoute>
+                <JobApplicantsPage />
+              </PrivateRoute>
+            }
+          />
+
           <Route
             path="/jobs/:id/edit"
             element={
               <PrivateRoute>
                 <CreateJob />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/user/profile"
+            element={
+              <PrivateRoute>
+                <UserProfile />
               </PrivateRoute>
             }
           />

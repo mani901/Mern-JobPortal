@@ -17,12 +17,13 @@ import useToastNotification from "@/components/common/Toast";
 const CompanyRegister = () => {
   const navigate = useNavigate();
   const { showSuccess, showError } = useToastNotification();
+  const [selectedLogo, setSelectedLogo] = useState(null);
+  const [preview, setPreview] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     website: "",
     location: "",
-    logo: "",
   });
 
   const {
@@ -33,19 +34,39 @@ const CompanyRegister = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
+    setFormData((prev) => ({
+      ...prev,
       [name]: value,
-    });
+    }));
+  };
+
+  const handleLogoChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedLogo(file);
+      setPreview(URL.createObjectURL(file));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const data = new FormData();
+    data.append("name", formData.name);
+    data.append("description", formData.description);
+    data.append("website", formData.website);
+    data.append("location", formData.location);
+    if (selectedLogo) {
+      data.append("logo", selectedLogo);
+    }
+
     try {
-      await registerCompany(formData);
-      showSuccess("Success!", response.message);
-      navigate("/"); // Redirect after successful registration
+      const response = await registerCompany(data); // Make sure this uses multipart
+      showSuccess("Success!", response?.message);
+      navigate("/");
     } catch (error) {
+      console.error("Registration error:", error);
+      console.log(error.response?.data?.message);
       const errorMessage =
         error.response?.data?.message ||
         "Registration failed. Please try again.";
@@ -115,27 +136,22 @@ const CompanyRegister = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="logo">Logo URL</Label>
+              <Label htmlFor="logo">Logo</Label>
               <Input
                 id="logo"
-                name="logo"
-                type="url"
-                placeholder="https://example.com/logo.png"
-                value={formData.logo}
-                onChange={handleChange}
+                type="file"
+                accept=".jpg, .jpeg, .png"
+                onChange={handleLogoChange}
               />
-              {formData.logo && (
+              {preview && (
                 <div className="mt-2 flex flex-col items-start">
                   <span className="text-sm text-muted-foreground mb-1">
                     Preview:
                   </span>
                   <img
-                    src={formData.logo}
+                    src={preview}
                     alt="Company logo preview"
                     className="h-16 w-16 object-contain rounded border"
-                    onError={(e) => {
-                      e.target.style.display = "none";
-                    }}
                   />
                 </div>
               )}

@@ -28,7 +28,7 @@ const NAVIGATION_ITEMS = [
 ];
 
 const USER_MENU_ITEMS = [
-  { path: "/profile", label: "Profile" },
+  { path: "/user/profile", label: "Profile" },
   { path: "/my-applications", label: "My Applications" },
   { path: "/settings", label: "Settings" },
 ];
@@ -200,7 +200,7 @@ export default function Navbar() {
                   >
                     <Avatar className="h-10 w-10">
                       <AvatarImage
-                        src={user.profile?.profilePhoto || ""}
+                        src={user.profile?.profilePhoto?.url || ""}
                         alt={user.fullname}
                       />
                       <AvatarFallback className="bg-emerald-100 text-emerald-700">

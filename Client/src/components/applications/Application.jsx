@@ -33,7 +33,6 @@ const ApplyJobPage = ({ job }) => {
   };
 
   const handleSubmit = async (e) => {
-    console.log("🎯 Frontend: Form submitted!");
     e.preventDefault();
 
     try {
@@ -43,27 +42,19 @@ const ApplyJobPage = ({ job }) => {
         jobId: job._id,
       };
 
-      console.log("📦 Frontend: Application data being sent to API:", applicationData);
-      console.log("📦 Frontend: Job object:", job);
-
-      console.log("🚀 Frontend: About to call submitApplication...");
       const response = await submitApplication(() => applyJob(applicationData));
-      console.log("✅ Frontend: Response received:", response);
 
       showSuccess(response?.message);
       setIsOpen(false);
       //  navigate("/my-applications");
     } catch (error) {
-      console.log("💥 Frontend: Error occurred:", error);
-      console.log("💥 Frontend: Error response:", error.response);
+      console.log("Error occurred:", error);
       const errorMessage = error.response?.data?.message;
       showError("Job Application Failed", errorMessage);
     }
   };
 
   const handleApplyClick = () => {
-    console.log("🎯 Frontend: Apply button clicked!");
-    console.log("🎯 Frontend: Job data:", job);
     setIsOpen(true);
   };
 

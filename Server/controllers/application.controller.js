@@ -6,7 +6,7 @@ import logger from '../utils/logger.js';
 import { sendApplicationNotification, sendApplicationStatusUpdate } from '../utils/email.js';
 
 export const applyForJob = async (req, res, next) => {
-    console.log('🚀 Starting applyForJob function');
+    console.log('Starting applyForJob function');
     try {
        
 
@@ -36,7 +36,7 @@ export const applyForJob = async (req, res, next) => {
             return next(new AppError('You have already applied for this job', StatusCodes.BAD_REQUEST));
         }
 
-        console.log('📝 Creating new application...');
+        console.log('Creating new application...');
         const application = await Application.create({
             job: jobId,
             applicant: userId,
@@ -47,7 +47,7 @@ export const applyForJob = async (req, res, next) => {
        
         job.applications.push(application._id);
         await job.save();
-        console.log('✅ Job updated with application');
+        console.log('Job updated with application');
 
         // Send email notification
         //console.log('📧 Sending email notification...');
@@ -100,7 +100,7 @@ export const getApplicationsByJob = async (req, res, next) => {
         // Verify job belongs to company
         const job = await Job.findOne({
             _id: jobId,
-            company: req.user.company
+            companyId: { $in: req.user.companies[0]._id }
         });
 
         if (!job) {
@@ -158,36 +158,28 @@ export const getApplicationById = async (req, res, next) => {
 
 export const updateApplicationStatus = async (req, res, next) => {
     try {
-        const { status } = req.body;
-        const { id } = req.params;
-
-        const application = await Application.findById(id)
-            .populate({
-                path: 'job',
-                select: 'title company',
-                populate: {
-                    path: 'company',
-                    select: 'name'
-                }
-            })
-            .populate('applicant', 'fullname email');
+        const { newStatus: status } = req.body;
+        const { applicationId } = req.params;
+console.log('Starting updateApplicationStatus function', { status, applicationId });
+        const application = await Application.findById(applicationId)
+            
 
         if (!application) {
             return next(new AppError('Application not found', StatusCodes.NOT_FOUND));
         }
-
+/*
         // Verify company owns the job
         if (application.job.company._id.toString() !== req.user.company.toString()) {
             return next(new AppError('Not authorized to update this application', StatusCodes.FORBIDDEN));
         }
-
+*/
         application.status = status;
         await application.save();
 
         // Send email notification
-        await sendApplicationStatusUpdate(application, application.job, application.applicant);
+       // await sendApplicationStatusUpdate(application, application.job, application.applicant);
 
-        logger.info(`Application status updated: ${id} to ${status}`);
+        logger.info(`Application status updated: ${applicationId} to ${status}`);
 
         res.status(StatusCodes.OK).json({
             success: true,

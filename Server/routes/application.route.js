@@ -14,8 +14,8 @@ const router = express.Router();
 // Protected routes
 router.post('/apply', authenticateUser, upload.none(),authorizeRoles('student'), applyForJob);
 router.get('/my-applications', authenticateUser, authorizeRoles('student'), getApplicationsByUser);
-router.get('/job/:jobId', authenticateUser, authorizeRoles('recruiter'), getApplicationsByJob);
+router.get('/job-applications/:jobId', authenticateUser, authorizeRoles('recruiter'), getApplicationsByJob);
 router.get('/:id', authenticateUser, getApplicationById);
-router.patch('/:id/status', authenticateUser, authorizeRoles('student'), updateApplicationStatus);
+router.patch('/update-status/:applicationId', authenticateUser, authorizeRoles('recruiter'), updateApplicationStatus);
 
 export default router; 

@@ -8,12 +8,12 @@ const axiosInstance = axios.create({
 // Add request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    console.log("🌐 Axios: Making request to:", config.baseURL + config.url);
-    console.log("🌐 Axios: Request config:", config);
+    console.log("Axios: Making request to:", config.baseURL + config.url);
+    console.log("Axios: Request config:", config);
     return config;
   },
   (error) => {
-    console.log("🌐 Axios: Request error:", error);
+    console.log("Axios: Request error:", error);
     return Promise.reject(error);
   }
 );
@@ -21,11 +21,11 @@ axiosInstance.interceptors.request.use(
 // Add response interceptor
 axiosInstance.interceptors.response.use(
   (response) => {
-    console.log("🌐 Axios: Response received:", response);
+    console.log("Axios: Response received:", response);
     return response;
   },
   (error) => {
-    console.log("🌐 Axios: Response error:", error);
+    console.log(" Axios: Response error:", error);
     return Promise.reject(error);
   }
 );

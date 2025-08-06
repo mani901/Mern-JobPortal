@@ -1,6 +1,7 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
+import { uploadToCloudinary, deleteFromCloudinary } from "../utils/fileUpload.js";
 export const register = async (req, res) => {
     try {
         const { fullname, email, phoneNumber, password, role } = req.body;
@@ -130,7 +131,7 @@ export const logOut = async (req, res) => {
 
 export const getProfile = async (req, res) => {
     try {
-        const userId = req.id; // From isAuthenticated middleware
+        const userId = req.id; 
         
         const user = await User.findById(userId).populate('companies').select("-password");
         if (!user) {
@@ -162,36 +163,63 @@ export const getProfile = async (req, res) => {
     }
 };
 
+
+
 export const updateProfile = async (req, res) => {
     try {
-        const { fullname, email, phoneNumber, bio, skills } = req.body
-        const file = req.file
-
-
-        //cloudinary file handling
-        //resume handling
-        let skillsArray;
-        if (skills) {
-            skillsArray = skills.split(",");
-        }
+        const { fullname, email, phoneNumber, bio, skills } = req.body;
+        const files = req.files;
+      
 
         const userid = req.id;
         let user = await User.findById(userid);
+
         if (!user) {
             return res.status(404).json({
                 message: "User Not Found",
                 success: false
-            })
+            });
         }
+
+        // Update text fields
         if (fullname) user.fullname = fullname;
         if (email) user.email = email;
         if (phoneNumber) user.phoneNumber = phoneNumber;
         if (bio) user.profile.bio = bio;
-        if (skills) user.profile.skills = skillsArray;
+        if (skills) user.profile.skills = skills;
 
+        // Handle profile photo upload
+        if (files && files.profilePhoto) {
+            console.log("Uploading profile...")
+            const profilePhoto = files.profilePhoto[0];
+           if (user.profile.profilePhoto &&user.profile.profilePhoto.public_id) {
+  await deleteFromCloudinary(user.profile.profilePhoto.public_id);
+}
 
-        //resume setup later
-        user.save();
+            const result = await uploadToCloudinary(profilePhoto.buffer, "profile_photos");
+            user.profile.profilePhoto = {
+                public_id: result.public_id,
+                url: result.url
+            };
+            console.log("Uploaded result: " , result)
+        }
+
+        // Handle resume upload
+        if (files && files.resume) {
+            const resume = files.resume[0];
+            if (user.profile.resume && user.profile.resume.url) {
+                await deleteFromCloudinary(user.profile.resume.public_id);
+            }
+            const result = await uploadToCloudinary(resume.buffer, "resumes");
+            user.profile.resume = {
+                public_id: result.public_id,
+                url: result.url
+            };
+            user.profile.resumeOriginalName = resume.originalname;
+        }
+
+        await user.save();
+
         user = {
             _id: user._id,
             fullname: user.fullname,
@@ -199,14 +227,18 @@ export const updateProfile = async (req, res) => {
             phoneNumber: user.phoneNumber,
             role: user.role,
             profile: user.profile
-        }
+        };
 
         return res.status(200).json({
-            message: "user updated successfully",
+            message: "User updated successfully",
             user,
             success: true
-        })
+        });
     } catch (error) {
-        console.log(error)
+        console.log(error);
+        return res.status(500).json({
+            message: "Something went wrong",
+            success: false
+        });
     }
-}
+};
