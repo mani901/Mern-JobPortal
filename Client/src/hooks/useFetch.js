@@ -1,15 +1,29 @@
 // hooks/useFetch.js
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 const useFetch = (fetchFunction, dependencies = []) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetchFunction(); // call the service
+      setData(res.data);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchFunction]);
+
   useEffect(() => {
     let isMounted = true;
 
-    const fetchData = async () => {
+    const executeFetch = async () => {
       setLoading(true);
       setError(null);
 
@@ -29,14 +43,18 @@ const useFetch = (fetchFunction, dependencies = []) => {
       }
     };
 
-    fetchData();
+    executeFetch();
 
     return () => {
       isMounted = false;
     };
   }, dependencies);
 
-  return { data, loading, error };
+  const refetch = useCallback(() => {
+    fetchData();
+  }, [fetchData]);
+
+  return { data, loading, error, refetch };
 };
 
 export default useFetch;

@@ -52,7 +52,7 @@ export const createJob = async (req, res, next) => {
 
 export const getAllJobs = async (req, res, next) => {
     try {
-        const { page = 1, limit = 10, sort = '-createdAt' } = req.query;
+        const { page = 1, limit = 5, sort = '-createdAt' } = req.query;
         const skip = (page - 1) * limit;
 
         const jobs = await Job.find()
@@ -83,7 +83,7 @@ export const getJobById = async (req, res, next) => {
 
     try {
         const job = await Job.findById(req.params.jobId)
-            .populate('companyId', 'name logo description')
+            .populate('companyId', 'name logo description website location')
             .populate('createdBy', 'fullname email');
 
         if (!job) {
@@ -166,8 +166,19 @@ export const deleteJob = async (req, res, next) => {
 
 export const searchJobs = async (req, res, next) => {
     try {
-        const { title, location, type, minSalary, maxSalary } = req.query;
+        const { 
+            title, 
+            location, 
+            type, 
+            minSalary, 
+            maxSalary, 
+            startDate,
+            page = 1, 
+            limit = 10 
+        } = req.query;
+        
         const query = {};
+        const skip = (page - 1) * limit;
 
         if (title) {
             query.title = { $regex: title, $options: 'i' };
@@ -178,7 +189,9 @@ export const searchJobs = async (req, res, next) => {
         }
 
         if (type) {
-            query.jobType = type;
+            // Handle multiple job types separated by commas
+            const jobTypes = type.split(',').map(t => t.trim());
+            query.jobType = { $in: jobTypes };
         }
 
         if (minSalary || maxSalary) {
@@ -187,14 +200,27 @@ export const searchJobs = async (req, res, next) => {
             if (maxSalary) query.salary.$lte = Number(maxSalary);
         }
 
+        if (startDate) {
+            query.createdAt = { $gte: new Date(startDate) };
+        }
+
         const jobs = await Job.find(query)
             .populate('companyId', 'name logo')
             .populate('createdBy', 'fullname email')
-            .sort('-createdAt');
+            .sort('-createdAt')
+            .skip(skip)
+            .limit(Number(limit));
+
+        const total = await Job.countDocuments(query);
 
         res.status(StatusCodes.OK).json({
             success: true,
-            data: jobs
+            data: jobs,
+            pagination: {
+                total,
+                page: Number(page),
+                pages: Math.ceil(total / limit)
+            }
         });
     } catch (error) {
         logger.error('Error searching jobs:', error);

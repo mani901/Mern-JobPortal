@@ -27,11 +27,6 @@ const JobDetailsPage = () => {
 
   const job = response?.data;
 
-  // Debug logging
-  console.log("JobDetails - Full response:", response);
-  console.log("JobDetails - Job data:", job);
-  console.log("JobDetails - JobId from params:", jobId);
-
   // Show error toast when there's an error
   useEffect(() => {
     if (error) {
@@ -119,9 +114,7 @@ const JobDetailsPage = () => {
                   <div className="flex items-center mt-2 space-x-4">
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Briefcase className="h-4 w-4 mr-1" />
-                      {job.companyId?.name ||
-                        job.company?.name ||
-                        "Unknown Company"}
+                      {job.companyId?.name || "Unknown Company"}
                     </div>
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Calendar className="h-4 w-4 mr-1" />
@@ -210,29 +203,24 @@ const JobDetailsPage = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center space-x-4">
                 <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
-                  {job.companyId?.logo || job.company?.logo ? (
+                  {job.companyId?.logo?.url ? (
                     <img
-                      src={job.companyId?.logo || job.company?.logo}
-                      alt={`${job.companyId?.name || job.company?.name} logo`}
+                      src={job.companyId?.logo?.url}
+                      alt={`${job.companyId?.name} logo`}
                       className="h-full w-full object-cover"
                     />
                   ) : (
                     <span className="text-lg font-medium">
-                      {(job.companyId?.name || job.company?.name || "C").charAt(
-                        0
-                      )}
+                      {(job.companyId?.name || "C").charAt(0)}
                     </span>
                   )}
                 </div>
                 <div>
                   <h4 className="font-medium">
-                    {job.companyId?.name ||
-                      job.company?.name ||
-                      "Unknown Company"}
+                    {job.companyId?.name || "Unknown Company"}
                   </h4>
                   <p className="text-sm text-muted-foreground">
                     {job.companyId?.description ||
-                      job.company?.description ||
                       "No company description available."}
                   </p>
                 </div>
