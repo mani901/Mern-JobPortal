@@ -42,7 +42,7 @@ export const createJob = async (req, res, next) => {
         res.status(201).json({
             success: true,
             message: "Job created successfully",
-            job
+            data: job
         });
     } catch (error) {
         logger.error('Error creating job:', error);
@@ -66,6 +66,7 @@ export const getAllJobs = async (req, res, next) => {
 
         res.status(StatusCodes.OK).json({
             success: true,
+            message: "Jobs fetched successfully",
             data: jobs,
             pagination: {
                 total,
@@ -92,6 +93,7 @@ export const getJobById = async (req, res, next) => {
 
         res.status(StatusCodes.OK).json({
             success: true,
+            message: "Job fetched successfully",
             data: job
         });
     } catch (error) {
@@ -123,6 +125,7 @@ export const updateJob = async (req, res, next) => {
 
         res.status(StatusCodes.OK).json({
             success: true,
+            message: "Job updated successfully",
             data: updatedJob
         });
     } catch (error) {
@@ -156,7 +159,8 @@ export const deleteJob = async (req, res, next) => {
 
         res.status(StatusCodes.OK).json({
             success: true,
-            message: 'Job deleted successfully'
+            message: 'Job deleted successfully',
+            data: null
         });
     } catch (error) {
         logger.error('Error deleting job:', error);
@@ -215,6 +219,7 @@ export const searchJobs = async (req, res, next) => {
 
         res.status(StatusCodes.OK).json({
             success: true,
+            message: "Jobs fetched successfully",
             data: jobs,
             pagination: {
                 total,
@@ -236,6 +241,7 @@ export const getJobsByCompany = async (req, res, next) => {
 
         res.status(StatusCodes.OK).json({
             success: true,
+            message: "Company jobs fetched successfully",
             data: jobs
         });
     } catch (error) {

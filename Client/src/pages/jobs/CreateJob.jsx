@@ -350,7 +350,7 @@ export const CreateJob = () => {
 
             <Button
               type="submit"
-              className="w-full bg-green-900 hover:bg-green-800"
+              className="w-full bg-green-800 hover:bg-green-700"
               disabled={postLoading}
             >
               {postLoading ? "Posting Job..." : "Post Job"}

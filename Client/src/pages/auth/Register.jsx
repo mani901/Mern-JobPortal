@@ -1,24 +1,35 @@
-import React, { useState } from 'react';
-import { useAuth } from '../../context/authContext.jsx';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import useToastNotification from '@/components/common/Toast';
+import React, { useState } from "react";
+import { useAuth } from "../../context/authContext.jsx";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import useToastNotification from "@/components/common/Toast";
 
 const Register = () => {
   const { register } = useAuth();
   const { showSuccess, showError } = useToastNotification();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    fullname: '',
-    phoneNumber: '',
-    role: '',
+    email: "",
+    password: "",
+    fullname: "",
+    phoneNumber: "",
+    role: "",
   });
-
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,15 +44,22 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await register(formData.fullname, formData.email, formData.phoneNumber, formData.password, formData.role);
+      await register(
+        formData.fullname,
+        formData.email,
+        formData.phoneNumber,
+        formData.password,
+        formData.role
+      );
       showSuccess("Welcome!", "Your account has been created successfully.");
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Registration failed. Please try again.";
+      const errorMessage =
+        error.response?.data?.message ||
+        "Registration failed. Please try again.";
       showError("Registration Failed", errorMessage);
     } finally {
       setLoading(false);
     }
-
   };
 
   return (
@@ -123,8 +141,12 @@ const Register = () => {
               </Select>
             </div>
 
-            <Button type="submit" className="w-full bg-green-900" disabled={loading}>
-              {loading ? 'Registering in...' : 'Register'}
+            <Button
+              type="submit"
+              className="w-full bg-green-800 hover:bg-green-700"
+              disabled={loading}
+            >
+              {loading ? "Registering in..." : "Register"}
             </Button>
           </form>
         </CardContent>

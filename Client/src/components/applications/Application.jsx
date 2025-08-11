@@ -62,7 +62,7 @@ const ApplyJobPage = ({ job }) => {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button
-          className="bg-green-900 hover:bg-green-900/70"
+          className="bg-green-800 hover:bg-green-700"
           onClick={handleApplyClick}
         >
           Apply
@@ -99,7 +99,11 @@ const ApplyJobPage = ({ job }) => {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="bg-green-800 hover:bg-green-700"
+            >
               {loading ? "Submitting..." : "Submit Application"}
             </Button>
           </div>

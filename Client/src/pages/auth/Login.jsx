@@ -11,7 +11,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import useToastNotification from "@/components/common/Toast";
 
 const Login = () => {
@@ -36,16 +42,24 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await login(formData.email, formData.password, formData.role);
+    const response = await login(
+      formData.email,
+      formData.password,
+      formData.role
+    );
     console.log("Full response:", response);
 
     if (response?.success) {
       // Success case
-      showSuccess("Welcome back!", response?.message || "You have been logged in successfully.");
+      showSuccess(
+        "Welcome back!",
+        response?.message || "You have been logged in successfully."
+      );
       navigate("/");
     } else {
       // Error case
-      const errorMessage = response?.error || "Login failed. Please check your credentials.";
+      const errorMessage =
+        response?.error || "Login failed. Please check your credentials.";
       showError("Login Failed", errorMessage);
     }
   };
@@ -109,7 +123,7 @@ const Login = () => {
 
             <Button
               type="submit"
-              className="w-full bg-green-900 hover:bg-green-900/70"
+              className="w-full bg-green-800 hover:bg-green-700"
               disabled={loading}
             >
               {loading ? "Logging in..." : "Login"}

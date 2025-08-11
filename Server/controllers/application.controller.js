@@ -59,6 +59,7 @@ export const applyForJob = async (req, res, next) => {
         
         res.status(StatusCodes.CREATED).json({
             success: true,
+            message: 'Application submitted successfully',
             data: application
         });
     } catch (error) {
@@ -83,6 +84,7 @@ export const getApplicationsByUser = async (req, res, next) => {
 
         res.status(StatusCodes.OK).json({
             success: true,
+            message: 'Applications fetched successfully',
             data: applications
         });
     } catch (error) {
@@ -111,6 +113,7 @@ export const getApplicationsByJob = async (req, res, next) => {
 
         res.status(StatusCodes.OK).json({
             success: true,
+            message: 'Job applications fetched successfully',
             data: applications
         });
     } catch (error) {
@@ -146,6 +149,7 @@ export const getApplicationById = async (req, res, next) => {
 
         res.status(StatusCodes.OK).json({
             success: true,
+            message: 'Application fetched successfully',
             data: application
         });
     } catch (error) {
@@ -181,6 +185,7 @@ console.log('Starting updateApplicationStatus function', { status, applicationId
 
         res.status(StatusCodes.OK).json({
             success: true,
+            message: 'Application status updated',
             data: application
         });
     } catch (error) {

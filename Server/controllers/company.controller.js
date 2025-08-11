@@ -43,9 +43,9 @@ export const registerCompany = async (req, res, next) => {
     await user.save();
 
     return res.status(201).json({
-      message: "Company registered successfully.",
-      company,
       success: true,
+      message: "Company registered successfully.",
+      data: company,
     });
   } catch (error) {
     return next(
@@ -67,8 +67,9 @@ export const getCompany = async (req, res, next) => {
     }
 
     return res.status(200).json({
-      companies,
       success: true,
+      message: "Companies fetched successfully.",
+      data: { companies },
     });
   } catch (error) {
     return next(new AppError(error.message || "Error fetching companies.", 500));
@@ -85,8 +86,9 @@ export const getCompanyById = async (req, res, next) => {
     }
 
     return res.status(200).json({
-      company,
       success: true,
+      message: "Company fetched successfully.",
+      data: company,
     });
   } catch (error) {
     return next(
@@ -107,9 +109,9 @@ export const updateCompany = async (req, res, next) => {
     }
 
     return res.status(200).json({
-      message: "Company information updated.",
-      company,
       success: true,
+      message: "Company information updated.",
+      data: company,
     });
   } catch (error) {
     return next(new AppError(error.message || "Error updating company.", 500));

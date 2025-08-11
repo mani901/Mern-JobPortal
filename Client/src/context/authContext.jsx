@@ -25,8 +25,8 @@ export function AuthProvider({ children }) {
 
       const response = await axiosInstance.get("/api/v1/user/profile");
 
-      if (response.data.success === "true") {
-        setUser(response.data.user);
+      if (response.data.success === true) {
+        setUser(response.data.data);
         console.log(user);
       } else {
         setUser(null);
@@ -56,9 +56,9 @@ export function AuthProvider({ children }) {
           role: role,
         });
         console.log(response.data);
-        if (response.data.success === "true") {
-          setUser(response.data.user);
-          console.log("User logged in:", response.data.user);
+        if (response.data.success === true) {
+          setUser(response.data.data);
+          console.log("User logged in:", response.data.data);
           return {
             success: true,
             message: response.data.message,
@@ -110,8 +110,8 @@ export function AuthProvider({ children }) {
           role,
         });
         console.log(response.data);
-        if (response.data.success === "true") {
-          setUser(response.data.user);
+        if (response.data.success === true) {
+          setUser(response.data.data);
           return {
             success: true,
             message: response.data.message,

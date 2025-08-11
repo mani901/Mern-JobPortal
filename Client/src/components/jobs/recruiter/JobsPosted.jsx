@@ -129,7 +129,7 @@ export default function JobsPosted() {
                     variant="ghost"
                     size="sm"
                     onClick={() => navigate(`/manage-applicants/${job._id}`)}
-                    className="text-green-700 hover:text-green-900 hover:bg-green-300"
+                    className="text-green-700 hover:text-green-900 hover:bg-green-50"
                   >
                     <BookText className="w-4 h-4" />
                   </Button>

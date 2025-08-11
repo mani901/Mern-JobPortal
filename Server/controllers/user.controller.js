@@ -29,16 +29,16 @@ export const register = async (req, res, next) => {
         });
 
         return res.status(201).json({
+            success: true,
             message: "User registered successfully",
-            user: {
+            data: {
                 _id: newUser._id,
                 fullname: newUser.fullname,
                 email: newUser.email,
                 phoneNumber: newUser.phoneNumber,
                 role: newUser.role,
                 profile: newUser.profile
-            },
-            success: true
+            }
         });
     } catch (error) {
         return next(new AppError(error.message || "Something went wrong", 400));
@@ -77,9 +77,9 @@ export const login = async (req, res, next) => {
         }
         const token = await jwt.sign(tokenData, process.env.JWT_SECRET, { expiresIn: "1d" });
         return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'lax' }).json({
+            success: true,
             message: `Welcome back ${user.fullname}`,
-            success: "true",
-            user: userResponse
+            data: userResponse
         })
     } catch (error) {
         return next(new AppError(error.message || "Something went wrong", 400));
@@ -111,9 +111,9 @@ export const getProfile = async (req, res, next) => {
         }
 
         return res.status(200).json({
+            success: true,
             message: "Profile fetched successfully",
-            success: "true",
-            user: {
+            data: {
                 _id: user._id,
                 fullname: user.fullname,
                 email: user.email,
@@ -192,11 +192,52 @@ export const updateProfile = async (req, res, next) => {
         };
 
         return res.status(200).json({
+            success: true,
             message: "User updated successfully",
-            user,
-            success: true
+            data: user
         });
     } catch (error) {
         return next(new AppError(error.message || "Something went wrong", 500));
+    }
+};
+
+export const toggleSaveJob = async (req, res, next) => {
+    try {
+        const userId = req.id;
+        const { jobId } = req.body;
+
+        if (!jobId) {
+            return next(new AppError("Job ID is required", 400));
+        }
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return next(new AppError("User not found", 404));
+        }
+
+        const index = user.savedJobs.findIndex(j => j.toString() === jobId);
+        if (index === -1) {
+            user.savedJobs.push(jobId);
+            await user.save();
+            return res.status(200).json({ success: true, message: "Job saved", data: { saved: true, savedJobs: user.savedJobs } });
+        } else {
+            user.savedJobs.splice(index, 1);
+            await user.save();
+            return res.status(200).json({ success: true, message: "Job removed from saved", data: { saved: false, savedJobs: user.savedJobs } });
+        }
+    } catch (error) {
+        return next(new AppError(error.message || "Failed to update saved jobs", 500));
+    }
+};
+
+export const getSavedJobs = async (req, res, next) => {
+    try {
+        const user = await User.findById(req.id).populate({ path: 'savedJobs', populate: { path: 'companyId', select: 'name logo' } });
+        if (!user) {
+            return next(new AppError("User not found", 404));
+        }
+        return res.status(200).json({ success: true, message: "Saved jobs fetched", data: user.savedJobs });
+    } catch (error) {
+        return next(new AppError(error.message || "Failed to fetch saved jobs", 500));
     }
 };

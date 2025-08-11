@@ -30,6 +30,7 @@ const NAVIGATION_ITEMS = [
 const USER_MENU_ITEMS = [
   { path: "/user/profile", label: "Profile" },
   { path: "/my-applications", label: "My Applications" },
+  { path: "/saved-jobs", label: "Saved Jobs" },
   { path: "/settings", label: "Settings" },
 ];
 

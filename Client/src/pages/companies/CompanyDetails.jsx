@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, Building } from "lucide-react";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { getCompanies, updateCompany } from "@/services/companyService";
-import { useToast } from "@/hooks/use-toast";
+import useToastNotification from "@/components/common/Toast";
 import {
   Dialog,
   DialogContent,
@@ -27,10 +27,10 @@ import { Textarea } from "@/components/ui/textarea"; // ShadCN Textarea
 import { Label } from "@/components/ui/label"; // ShadCN Label
 
 export default function CompanyDetails() {
-  const { toast } = useToast();
+  const { showSuccess, showError } = useToastNotification();
   const { data: response, loading, error, refetch } = useFetch(getCompanies);
 
-  const companies = response?.companies || [];
+  const companies = response?.data?.companies || [];
   console.log("company data: ", companies);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -72,10 +72,10 @@ export default function CompanyDetails() {
 
     try {
       const res = await updateCompany(selectedCompany._id, payload);
-      toast({
-        title: "Updated",
-        description: res?.data?.message || "Company updated successfully",
-      });
+      showSuccess(
+        "Updated",
+        res?.data?.message || "Company updated successfully"
+      );
       setIsModalOpen(false);
       refetch();
     } catch (err) {
@@ -83,13 +83,13 @@ export default function CompanyDetails() {
         err?.response?.data?.message ||
         err?.message ||
         "Failed to update company";
-      toast({ title: "Update failed", description });
+      showError("Update failed", description);
     }
   };
 
   if (loading) {
     return (
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-4 min-h-[50vh] flex items-center justify-center">
         <LoadingSpinner />
       </div>
     );
@@ -97,9 +97,11 @@ export default function CompanyDetails() {
 
   if (error) {
     return (
-      <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen">
+      <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-[50vh]">
         <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
-        <p className="text-lg font-semibold text-red-500">{error}</p>
+        <p className="text-lg font-semibold text-red-500">
+          {error?.message || "Something went wrong"}
+        </p>
         <Button
           variant="outline"
           className="mt-4"
@@ -113,13 +115,15 @@ export default function CompanyDetails() {
 
   if (companies.length === 0) {
     return (
-      <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen">
+      <div className="container mx-auto p-4 flex flex-col items-center justify-center min-h-[50vh]">
         <Building className="w-16 h-16 text-muted-foreground mb-4" />
         <h2 className="text-2xl font-bold mb-2">No Companies Found</h2>
         <p className="text-muted-foreground mb-6">
           It looks like you haven't added any companies yet.
         </p>
-        <Button variant="default">Create a Company</Button>
+        <Button variant="default" className="bg-green-800 hover:bg-green-700">
+          Create a Company
+        </Button>
       </div>
     );
   }

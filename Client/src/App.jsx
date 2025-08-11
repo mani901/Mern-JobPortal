@@ -4,7 +4,7 @@ import { Routes, Route } from "react-router-dom";
 // Import components
 import Navbar from "@/components/common/Navbar";
 import Footer from "@/components/common/Footer";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "react-hot-toast";
 
 // Import pages
 import Home from "@/pages/Home";
@@ -25,7 +25,8 @@ import AppliedJobsList from "@/pages/applications/AppliedJobsList";
 import JobsPosted from "@/components/jobs/recruiter/JobsPosted";
 import JobApplicantsPage from "@/pages/jobs/JobApplicantsPage";
 import UserProfile from "@/pages/user/UserProfile";
-import CompanyDetails from "./pages/companies/CompanyDetails";
+import CompanyDetails from "@/pages/companies/CompanyDetails";
+
 function App() {
   return (
     <div className="App">
@@ -57,6 +58,14 @@ function App() {
           {/* Private routes - only for authenticated users */}
           <Route
             path="/my-applications"
+            element={
+              <PrivateRoute>
+                <AppliedJobsList />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/saved-jobs"
             element={
               <PrivateRoute>
                 <AppliedJobsList />
@@ -131,7 +140,7 @@ function App() {
         </Routes>
       </main>
       <Footer />
-      <Toaster />
+      <Toaster position="bottom-right" toastOptions={{ duration: 4000 }} />
     </div>
   );
 }

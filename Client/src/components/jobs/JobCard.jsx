@@ -1,9 +1,18 @@
 // JobCard.jsx
-import React from "react";
-import { Briefcase, Clock, DollarSign, MapPin } from "lucide-react";
+import React, { useState } from "react";
+import {
+  Briefcase,
+  Clock,
+  DollarSign,
+  MapPin,
+  Bookmark,
+  BookmarkCheck,
+} from "lucide-react";
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import ApplyJobPage from "@/components/applications/Application";
+import { toggleSaveJob } from "@/services/userService";
+import useToastNotification from "@/components/common/Toast";
 
 const JobCard = ({
   jobId,
@@ -17,6 +26,9 @@ const JobCard = ({
   job,
 }) => {
   const navigate = useNavigate();
+  const { showSuccess, showError } = useToastNotification();
+  const [saving, setSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(job?.isSaved || false);
 
   const jobData = job || {
     title,
@@ -96,7 +108,39 @@ const JobCard = ({
               </svg>
             </button>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
+              <button
+                className={`inline-flex items-center justify-center rounded-md border px-2.5 py-1.5 text-sm transition-colors ${
+                  isSaved
+                    ? "bg-green-50 border-green-200 text-green-700"
+                    : "bg-white border-gray-200 text-gray-700 hover:bg-gray-50"
+                }`}
+                disabled={saving}
+                onClick={async () => {
+                  try {
+                    setSaving(true);
+                    const res = await toggleSaveJob(jobId);
+                    setIsSaved(res.data.data?.saved);
+                    showSuccess(res.data.message);
+                  } catch (err) {
+                    showError(
+                      "Error",
+                      err?.response?.data?.message ||
+                        "Failed to update saved jobs"
+                    );
+                  } finally {
+                    setSaving(false);
+                  }
+                }}
+                aria-label={isSaved ? "Unsave job" : "Save job"}
+                title={isSaved ? "Unsave job" : "Save job"}
+              >
+                {isSaved ? (
+                  <BookmarkCheck className="w-4 h-4" />
+                ) : (
+                  <Bookmark className="w-4 h-4" />
+                )}
+              </button>
               <ApplyJobPage job={jobData} />
             </div>
           </div>
