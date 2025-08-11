@@ -25,6 +25,7 @@ import AppliedJobsList from "@/pages/applications/AppliedJobsList";
 import JobsPosted from "@/components/jobs/recruiter/JobsPosted";
 import JobApplicantsPage from "@/pages/jobs/JobApplicantsPage";
 import UserProfile from "@/pages/user/UserProfile";
+import CompanyDetails from "./pages/companies/CompanyDetails";
 function App() {
   return (
     <div className="App">
@@ -59,6 +60,15 @@ function App() {
             element={
               <PrivateRoute>
                 <AppliedJobsList />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/company/my-companies"
+            element={
+              <PrivateRoute>
+                <CompanyDetails />
               </PrivateRoute>
             }
           />

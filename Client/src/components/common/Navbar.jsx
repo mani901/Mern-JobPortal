@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 
 const NAVIGATION_ITEMS = [
   { path: "/jobs", label: "Find Jobs" },
-  { path: "/companies", label: "Companies" },
+  { path: "/company/my-companies", label: "Companies" },
   { path: "/company/create-company", label: "Create Company" },
   { path: "/company/manage-jobs", label: "Manage Jobs" },
   { path: "/company/create-job", label: "Create Job" },

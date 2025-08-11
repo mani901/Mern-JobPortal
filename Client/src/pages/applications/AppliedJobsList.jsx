@@ -7,10 +7,9 @@ import { getUserApplications } from "@/services/applicationService";
 const AppliedJobsList = () => {
   const { showError } = useToastNotification();
   const { data: response, loading, error } = useFetch(getUserApplications);
-  console.log("Response from getUserApplications:", response);
-  console.log("Error from getUserApplications:", error);
+
   const applications = response?.data || [];
-  console.log("applications:", applications);
+
   useEffect(() => {
     if (error) {
       const errorMessage =

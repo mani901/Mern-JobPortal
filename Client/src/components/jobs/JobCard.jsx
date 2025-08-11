@@ -78,7 +78,7 @@ const JobCard = ({
 
           <div className="mt-5 flex justify-between items-center">
             <button
-              className="text-sm font-medium text-green-600 hover:text-green-800 transition-colors flex items-center gap-1 group-hover:underline"
+              className="text-sm font-medium text-green-800 hover:text-green-600 transition-colors flex items-center gap-1 group-hover:underline"
               onClick={() => navigate(`/jobs/${jobId}`)}
             >
               View Details
