@@ -63,7 +63,7 @@ export default function CompanyDetails() {
   const handleSubmit = async () => {
     if (!selectedCompany || !formData.name) return;
 
-    const payload = {
+    const requestData = {
       name: formData.name,
       description: formData.description,
       website: formData.website,
@@ -71,7 +71,7 @@ export default function CompanyDetails() {
     };
 
     try {
-      const res = await updateCompany(selectedCompany._id, payload);
+      const res = await updateCompany(selectedCompany._id, requestData);
       showSuccess(
         "Updated",
         res?.data?.message || "Company updated successfully"

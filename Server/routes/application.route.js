@@ -1,5 +1,6 @@
 import express from 'express';
 import multer from "multer";
+import multerUpload from "../middlewares/multer.middleware.js";
 import { authenticateUser, authorizeRoles } from '../middlewares/auth.middleware.js';
 import {
     applyForJob,
@@ -12,7 +13,7 @@ const upload = multer();
 const router = express.Router();
 
 // Protected routes
-router.post('/apply', authenticateUser, upload.none(),authorizeRoles('student'), applyForJob);
+router.post('/apply', authenticateUser, authorizeRoles('student'), multerUpload.fields([{ name: 'resume', maxCount: 1 }]), applyForJob);
 router.get('/my-applications', authenticateUser, authorizeRoles('student'), getApplicationsByUser);
 router.get('/job-applications/:jobId', authenticateUser, authorizeRoles('recruiter'), getApplicationsByJob);
 router.get('/:id', authenticateUser, getApplicationById);

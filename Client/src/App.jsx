@@ -13,7 +13,6 @@ import Register from "@/pages/auth/Register";
 import JobList from "@/pages/jobs/JobList";
 import JobDetails from "@/pages/jobs/JobDetails";
 import CreateJob from "@/pages/jobs/CreateJob";
-import ApplicationPage from "@/components/applications/Application";
 import CompanyProfile from "@/pages/companies/CompanyProfile";
 import CompanyRegister from "@/pages/companies/CompanyRegister";
 import NotFound from "@/pages/NotFound";

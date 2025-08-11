@@ -102,7 +102,7 @@ export const CreateJob = () => {
 
     try {
       // Prepare job data for API - include company ID
-      const jobData = {
+      const requestData = {
         title: formData.title,
         description: formData.description,
         requirements: formData.requirements,
@@ -114,9 +114,9 @@ export const CreateJob = () => {
       };
 
       // Debug: Check final payload being sent to API
-      console.log("Job data being sent to API:", jobData);
+      console.log("Job data being sent to API:", requestData);
 
-      const response = await postJob(jobData);
+      const response = await postJob(requestData);
       showSuccess(
         "Job Posted!",
         response?.message || "Your job posting has been created successfully."

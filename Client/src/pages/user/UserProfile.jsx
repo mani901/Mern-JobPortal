@@ -88,25 +88,25 @@ const UserProfile = () => {
   const saveProfile = async () => {
     setIsEditing(false);
     try {
-      const formData = new FormData();
-      formData.append("fullname", profile.fullname);
-      formData.append("email", profile.email);
-      formData.append("phoneNumber", profile.phoneNumber);
-      formData.append("bio", profile.bio);
+      const requestData = new FormData();
+      requestData.append("fullname", profile.fullname);
+      requestData.append("email", profile.email);
+      requestData.append("phoneNumber", profile.phoneNumber);
+      requestData.append("bio", profile.bio);
 
       profile.skills.forEach((skill) => {
-        formData.append("skills", skill);
+        requestData.append("skills", skill);
       });
 
       if (selectedProfilePhoto) {
-        formData.append("profilePhoto", selectedProfilePhoto);
+        requestData.append("profilePhoto", selectedProfilePhoto);
       }
 
       if (selectedResume) {
-        formData.append("resume", selectedResume);
+        requestData.append("resume", selectedResume);
       }
 
-      const response = await update_profile(formData);
+      const response = await update_profile(requestData);
       checkAuthStatus();
       showSuccess(
         "Profile Updated Successfully!",

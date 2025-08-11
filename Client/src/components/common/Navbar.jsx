@@ -18,8 +18,12 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ChevronDown, Menu, User } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const NAVIGATION_ITEMS = [
+const NAV_ITEMS_STUDENT = [
   { path: "/jobs", label: "Find Jobs" },
+  { path: "/about", label: "About" },
+];
+
+const NAV_ITEMS_RECRUITER = [
   { path: "/company/my-companies", label: "Companies" },
   { path: "/company/create-company", label: "Create Company" },
   { path: "/company/manage-jobs", label: "Manage Jobs" },
@@ -27,10 +31,15 @@ const NAVIGATION_ITEMS = [
   { path: "/about", label: "About" },
 ];
 
-const USER_MENU_ITEMS = [
+const USER_MENU_STUDENT = [
   { path: "/user/profile", label: "Profile" },
   { path: "/my-applications", label: "My Applications" },
   { path: "/saved-jobs", label: "Saved Jobs" },
+  { path: "/settings", label: "Settings" },
+];
+
+const USER_MENU_RECRUITER = [
+  { path: "/user/profile", label: "Profile" },
   { path: "/settings", label: "Settings" },
 ];
 
@@ -117,6 +126,12 @@ export default function Navbar() {
       navigate("/");
     }
   };
+
+  const role = user?.role;
+  const NAVIGATION_ITEMS =
+    role === "recruiter" ? NAV_ITEMS_RECRUITER : NAV_ITEMS_STUDENT;
+  const USER_MENU_ITEMS =
+    role === "recruiter" ? USER_MENU_RECRUITER : USER_MENU_STUDENT;
 
   const jobsItems = NAVIGATION_ITEMS.filter(
     (item) => item.path.includes("/jobs") || item.label.includes("Jobs")

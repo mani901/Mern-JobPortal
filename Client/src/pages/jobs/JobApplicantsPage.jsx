@@ -199,6 +199,32 @@ export default function JobApplicantsPage() {
                   )}
                 </div>
 
+                {/* Resume Link */}
+                <div className="space-y-2">
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <FileText className="h-4 w-4 mr-2" />
+                    <span className="font-medium">Resume</span>
+                  </div>
+                  {application.resume?.url ? (
+                    <a
+                      href={application.resume.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center text-green-700 hover:text-green-900 underline text-sm"
+                      title={application.resumeOriginalName || "Resume"}
+                    >
+                      View Resume
+                      {application.resumeOriginalName
+                        ? ` (${application.resumeOriginalName})`
+                        : ""}
+                    </a>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No resume provided.
+                    </p>
+                  )}
+                </div>
+
                 <Separator />
 
                 <div className="flex items-center justify-between text-sm text-muted-foreground">

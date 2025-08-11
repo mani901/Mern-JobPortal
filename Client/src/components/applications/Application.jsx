@@ -26,6 +26,7 @@ const ApplyJobPage = ({ job }) => {
     coverLetter: "",
     jobId: job._id,
   });
+  const [resumeFile, setResumeFile] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,13 +37,12 @@ const ApplyJobPage = ({ job }) => {
     e.preventDefault();
 
     try {
-      // Prepare application data for API
-      const applicationData = {
-        coverLetter: formData.coverLetter,
-        jobId: job._id,
-      };
+      const requestData = new FormData();
+      requestData.append("jobId", job._id);
+      requestData.append("coverLetter", formData.coverLetter);
+      if (resumeFile) requestData.append("resume", resumeFile);
 
-      const response = await submitApplication(() => applyJob(applicationData));
+      const response = await submitApplication(() => applyJob(requestData));
 
       showSuccess(response?.message);
       setIsOpen(false);
@@ -89,6 +89,22 @@ const ApplyJobPage = ({ job }) => {
               required
               className="resize-none"
             />
+          </div>
+          <div className="space-y-2">
+            <Label>Resume</Label>
+            <p className="text-sm text-gray-600">
+              Your profile resume will be used by default. To change it, update
+              your profile.
+            </p>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate("/user/profile")}
+              >
+                Update Resume in Profile
+              </Button>
+            </div>
           </div>
           <div className="flex justify-end gap-2">
             <Button

@@ -4,6 +4,7 @@ import { Job } from '../models/job.model.js';
 import AppError from '../utils/AppError.js';
 import logger from '../utils/logger.js';
 import { sendApplicationNotification, sendApplicationStatusUpdate } from '../utils/email.js';
+import { uploadToCloudinary } from '../utils/fileUpload.js';
 
 export const applyForJob = async (req, res, next) => {
     console.log('Starting applyForJob function');
@@ -37,10 +38,32 @@ export const applyForJob = async (req, res, next) => {
         }
 
         console.log('Creating new application...');
+        let resumeData = null;
+        let resumeOriginalName = undefined;
+        const files = req.files;
+        if (files && files.resume) {
+            const resumeFile = files.resume[0];
+            const result = await uploadToCloudinary(resumeFile.buffer, 'resumes');
+            resumeData = {
+                public_id: result.public_id,
+                url: result.url
+            };
+            resumeOriginalName = resumeFile.originalname;
+        } else if (req.user?.profile?.resume?.url) {
+            // Fallback to user's profile resume if no file uploaded
+            resumeData = {
+                public_id: req.user.profile.resume.public_id,
+                url: req.user.profile.resume.url
+            };
+            resumeOriginalName = req.user.profile.resumeOriginalName;
+        }
+
         const application = await Application.create({
             job: jobId,
             applicant: userId,
-            coverLetter
+            coverLetter,
+            resume: resumeData,
+            resumeOriginalName
         });
         
 

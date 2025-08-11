@@ -51,17 +51,17 @@ const CompanyRegister = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const data = new FormData();
-    data.append("name", formData.name);
-    data.append("description", formData.description);
-    data.append("website", formData.website);
-    data.append("location", formData.location);
+    const requestData = new FormData();
+    requestData.append("name", formData.name);
+    requestData.append("description", formData.description);
+    requestData.append("website", formData.website);
+    requestData.append("location", formData.location);
     if (selectedLogo) {
-      data.append("logo", selectedLogo);
+      requestData.append("logo", selectedLogo);
     }
 
     try {
-      const response = await registerCompany(data); // Make sure this uses multipart
+      const response = await registerCompany(requestData);
       showSuccess("Success!", response?.message);
       navigate("/");
     } catch (error) {
