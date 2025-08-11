@@ -2,23 +2,18 @@ import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { uploadToCloudinary, deleteFromCloudinary } from "../utils/fileUpload.js";
-export const register = async (req, res) => {
+import AppError from "../utils/AppError.js";
+export const register = async (req, res, next) => {
     try {
         const { fullname, email, phoneNumber, password, role } = req.body;
 
         if (!fullname || !email || !phoneNumber || !password || !role) {
-            return res.status(400).json({
-                message: "All fields are required",
-                success: false
-            });
+            return next(new AppError("All fields are required", 400));
         }
 
         const user = await User.findOne({ email });
         if (user) {
-            return res.status(400).json({
-                message: "Email already registered",
-                success: false
-            });
+            return next(new AppError("Email already registered", 400));
         }
 
 
@@ -46,38 +41,25 @@ export const register = async (req, res) => {
             success: true
         });
     } catch (error) {
-        console.error("Registration error:", error);
-        return res.status(400).json({
-            message: "Something went wrong",
-            success: false
-        });
+        return next(new AppError(error.message || "Something went wrong", 400));
     }
 };
 
 //login
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
     try {
         const { email, password, role } = req.body;
         //console.log(email)
         let user = await User.findOne({ email }).populate('companies');
         if (!user) {
-            return res.status(400).json({
-                message: "invalid Credentials",
-                success: "false"
-            })
+            return next(new AppError("invalid Credentials", 400));
         }
         const IsLogin = await bcrypt.compare(password, user.password);
         if (!IsLogin) {
-            return res.status(400).json({
-                message: "invalid Credentials",
-                success: "false"
-            })
+            return next(new AppError("invalid Credentials", 400));
         }
         if (role !== user.role) {
-            return res.status(400).json({
-                message: "Account does not exist with this role",
-                success: "false"
-            })
+            return next(new AppError("Account does not exist with this role", 400));
         }
 
         const tokenData = {
@@ -100,45 +82,32 @@ export const login = async (req, res) => {
             user: userResponse
         })
     } catch (error) {
-        console.log(error)
-        return res.status(400).json({
-
-            message: "Something went wrong",
-            success: false
-        })
+        return next(new AppError(error.message || "Something went wrong", 400));
     }
 }
 
-export const logOut = async (req, res) => {
+export const logOut = async (req, res, next) => {
     try {
         if (!req.cookies.token) {
-            return res.status(404).json({
-                message: "user Already logout"
-            })
+            return next(new AppError("user Already logout", 404));
         }
         return res.status(200).cookie("token", "", { maxAge: 0 }).json({
             message: "User Logged Out Successfully",
             success: true
         })
     } catch (error) {
-        return res.status(400).json({
-            message: "Something went wrong",
-            success: false
-        })
+        return next(new AppError(error.message || "Something went wrong", 400));
     }
 }
 
 
-export const getProfile = async (req, res) => {
+export const getProfile = async (req, res, next) => {
     try {
         const userId = req.id; 
         
         const user = await User.findById(userId).populate('companies').select("-password");
         if (!user) {
-            return res.status(404).json({
-                message: "User not found",
-                success: "false"
-            });
+            return next(new AppError("User not found", 404));
         }
 
         return res.status(200).json({
@@ -155,17 +124,13 @@ export const getProfile = async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            message: "Something went wrong",
-            success: "false"
-        });
+        return next(new AppError(error.message || "Something went wrong", 500));
     }
 };
 
 
 
-export const updateProfile = async (req, res) => {
+export const updateProfile = async (req, res, next) => {
     try {
         const { fullname, email, phoneNumber, bio, skills } = req.body;
         const files = req.files;
@@ -175,10 +140,7 @@ export const updateProfile = async (req, res) => {
         let user = await User.findById(userid);
 
         if (!user) {
-            return res.status(404).json({
-                message: "User Not Found",
-                success: false
-            });
+            return next(new AppError("User Not Found", 404));
         }
 
         // Update text fields
@@ -235,10 +197,6 @@ export const updateProfile = async (req, res) => {
             success: true
         });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            message: "Something went wrong",
-            success: false
-        });
+        return next(new AppError(error.message || "Something went wrong", 500));
     }
 };

@@ -45,8 +45,8 @@ export const createJob = async (req, res, next) => {
             job
         });
     } catch (error) {
-        console.log(error);
-        return next(new AppError('Error creating job', 500));
+        logger.error('Error creating job:', error);
+        return next(new AppError(error.message || 'Error creating job', 500));
     }
 };
 
@@ -75,7 +75,7 @@ export const getAllJobs = async (req, res, next) => {
         });
     } catch (error) {
         logger.error('Error fetching jobs:', error);
-        next(new AppError('Failed to fetch jobs', StatusCodes.INTERNAL_SERVER_ERROR));
+        next(new AppError(error.message || 'Failed to fetch jobs', StatusCodes.INTERNAL_SERVER_ERROR));
     }
 };
 
@@ -96,13 +96,13 @@ export const getJobById = async (req, res, next) => {
         });
     } catch (error) {
         logger.error('Error fetching job:', error);
-        next(new AppError('Failed to fetch job', StatusCodes.INTERNAL_SERVER_ERROR));
+        next(new AppError(error.message || 'Failed to fetch job', StatusCodes.INTERNAL_SERVER_ERROR));
     }
 };
 
 export const updateJob = async (req, res, next) => {
     try {
-        const job = await Job.findById(req.params.jobId);
+        const job = await Job.findById(req.params.id);
 
         if (!job) {
             return next(new AppError('Job not found', StatusCodes.NOT_FOUND));
@@ -113,7 +113,7 @@ export const updateJob = async (req, res, next) => {
         }
 
         const updatedJob = await Job.findByIdAndUpdate(
-            req.params.jobId,
+            req.params.id,
             req.body,
             { new: true, runValidators: true }
         ).populate('companyId', 'name logo')
@@ -127,7 +127,7 @@ export const updateJob = async (req, res, next) => {
         });
     } catch (error) {
         logger.error('Error updating job:', error);
-        next(new AppError('Failed to update job', StatusCodes.BAD_REQUEST));
+        next(new AppError(error.message || 'Failed to update job', StatusCodes.BAD_REQUEST));
     }
 };
 
@@ -160,7 +160,7 @@ export const deleteJob = async (req, res, next) => {
         });
     } catch (error) {
         logger.error('Error deleting job:', error);
-        next(new AppError('Failed to delete job', StatusCodes.INTERNAL_SERVER_ERROR));
+        next(new AppError(error.message || 'Failed to delete job', StatusCodes.INTERNAL_SERVER_ERROR));
     }
 };
 
@@ -224,7 +224,7 @@ export const searchJobs = async (req, res, next) => {
         });
     } catch (error) {
         logger.error('Error searching jobs:', error);
-        next(new AppError('Failed to search jobs', StatusCodes.INTERNAL_SERVER_ERROR));
+        next(new AppError(error.message || 'Failed to search jobs', StatusCodes.INTERNAL_SERVER_ERROR));
     }
 };
 
@@ -240,6 +240,6 @@ export const getJobsByCompany = async (req, res, next) => {
         });
     } catch (error) {
         logger.error('Error fetching company jobs:', error);
-        next(new AppError('Failed to fetch company jobs', StatusCodes.INTERNAL_SERVER_ERROR));
+        next(new AppError(error.message || 'Failed to fetch company jobs', StatusCodes.INTERNAL_SERVER_ERROR));
     }
 };

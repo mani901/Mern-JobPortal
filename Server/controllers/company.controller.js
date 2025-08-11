@@ -1,25 +1,20 @@
 import { Company } from "../models/company.model.js";
 import { User } from "../models/user.model.js";
 import { uploadToCloudinary, deleteFromCloudinary } from "../utils/fileUpload.js";
+import AppError from "../utils/AppError.js";
 
-export const registerCompany = async (req, res) => {
+export const registerCompany = async (req, res, next) => {
   try {
     const { name, description, website, location } = req.body;
     const files = req.files;
 
     if (!name) {
-      return res.status(400).json({
-        message: "Company name is required.",
-        success: false,
-      });
+      return next(new AppError("Company name is required.", 400));
     }
 
     let company = await Company.findOne({ name });
     if (company) {
-      return res.status(400).json({
-        message: "You can't register same company.",
-        success: false,
-      });
+      return next(new AppError("You can't register same company.", 400));
     }
 
     let logo = null;
@@ -53,24 +48,22 @@ export const registerCompany = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    console.log(error.message);
-    return res.status(500).json({
-      message: error.message || "Something went wrong while registering the company.",
-      success: false,
-    });
+    return next(
+      new AppError(
+        error.message || "Something went wrong while registering the company.",
+        500
+      )
+    );
   }
 };
 
-export const getCompany = async (req, res) => {
+export const getCompany = async (req, res, next) => {
   try {
     const userId = req.id;
     const companies = await Company.find({ userId });
 
     if (!companies || companies.length === 0) {
-      return res.status(404).json({
-        message: "Companies not found.",
-        success: false,
-      });
+      return next(new AppError("Companies not found.", 404));
     }
 
     return res.status(200).json({
@@ -78,23 +71,17 @@ export const getCompany = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: error.message || "Error fetching companies.",
-      success: false,
-    });
+    return next(new AppError(error.message || "Error fetching companies.", 500));
   }
 };
 
-export const getCompanyById = async (req, res) => {
+export const getCompanyById = async (req, res, next) => {
   try {
     const companyId = req.params.id;
     const company = await Company.findById(companyId);
 
     if (!company) {
-      return res.status(404).json({
-        message: "Company not found.",
-        success: false,
-      });
+      return next(new AppError("Company not found.", 404));
     }
 
     return res.status(200).json({
@@ -102,14 +89,13 @@ export const getCompanyById = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: error.message || "Error fetching company by ID.",
-      success: false,
-    });
+    return next(
+      new AppError(error.message || "Error fetching company by ID.", 500)
+    );
   }
 };
 
-export const updateCompany = async (req, res) => {
+export const updateCompany = async (req, res, next) => {
   try {
     const { name, description, website, location } = req.body;
     const updateData = { name, description, website, location };
@@ -117,10 +103,7 @@ export const updateCompany = async (req, res) => {
     const company = await Company.findByIdAndUpdate(req.params.id, updateData, { new: true });
 
     if (!company) {
-      return res.status(404).json({
-        message: "Company not found.",
-        success: false,
-      });
+      return next(new AppError("Company not found.", 404));
     }
 
     return res.status(200).json({
@@ -129,9 +112,6 @@ export const updateCompany = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    return res.status(500).json({
-      message: error.message || "Error updating company.",
-      success: false,
-    });
+    return next(new AppError(error.message || "Error updating company.", 500));
   }
 };

@@ -62,9 +62,8 @@ export const applyForJob = async (req, res, next) => {
             data: application
         });
     } catch (error) {
-      
         logger.error('Error creating application:', error);
-        next(new AppError('Failed to create application', StatusCodes.BAD_REQUEST));
+        next(new AppError(error.message || 'Failed to create application', StatusCodes.BAD_REQUEST));
     }
 };
 
@@ -87,9 +86,8 @@ export const getApplicationsByUser = async (req, res, next) => {
             data: applications
         });
     } catch (error) {
-        console.error('Error fetching user applications:', error.message);
         logger.error('Error fetching user applications:', error);
-        next(new AppError('Failed to fetch applications', StatusCodes.INTERNAL_SERVER_ERROR));
+        next(new AppError(error.message || 'Failed to fetch applications', StatusCodes.INTERNAL_SERVER_ERROR));
     }
 };
 
@@ -117,7 +115,7 @@ export const getApplicationsByJob = async (req, res, next) => {
         });
     } catch (error) {
         logger.error('Error fetching job applications:', error);
-        next(new AppError('Failed to fetch applications', StatusCodes.INTERNAL_SERVER_ERROR));
+        next(new AppError(error.message || 'Failed to fetch applications', StatusCodes.INTERNAL_SERVER_ERROR));
     }
 };
 
@@ -152,7 +150,7 @@ export const getApplicationById = async (req, res, next) => {
         });
     } catch (error) {
         logger.error('Error fetching application:', error);
-        next(new AppError('Failed to fetch application', StatusCodes.INTERNAL_SERVER_ERROR));
+        next(new AppError(error.message || 'Failed to fetch application', StatusCodes.INTERNAL_SERVER_ERROR));
     }
 };
 
@@ -187,6 +185,6 @@ console.log('Starting updateApplicationStatus function', { status, applicationId
         });
     } catch (error) {
         logger.error('Error updating application status:', error);
-        next(new AppError('Failed to update application status', StatusCodes.BAD_REQUEST));
+        next(new AppError(error.message || 'Failed to update application status', StatusCodes.BAD_REQUEST));
     }
 }; 
