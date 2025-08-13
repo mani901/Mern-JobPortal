@@ -27,7 +27,6 @@ const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    role: "",
   });
 
   const handleChange = (e) => {
@@ -42,11 +41,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const response = await login(
-      formData.email,
-      formData.password,
-      formData.role
-    );
+    const response = await login(formData.email, formData.password);
     console.log("Full response:", response);
 
     if (response?.success) {
@@ -100,25 +95,6 @@ const Login = () => {
                 value={formData.password}
                 required
               />
-            </div>
-
-            <div className="space-y-2 w-full">
-              <Label>Role</Label>
-              <Select
-                value={formData.role}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({ ...prev, role: value }))
-                }
-                required
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select your role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="student">Student</SelectItem>
-                  <SelectItem value="recruiter">Recruiter</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
 
             <Button

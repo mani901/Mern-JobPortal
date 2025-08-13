@@ -48,7 +48,7 @@ export const register = async (req, res, next) => {
 //login
 export const login = async (req, res, next) => {
     try {
-        const { email, password, role } = req.body;
+        const { email, password } = req.body;
         //console.log(email)
         let user = await User.findOne({ email }).populate('companies');
         if (!user) {
@@ -57,9 +57,6 @@ export const login = async (req, res, next) => {
         const IsLogin = await bcrypt.compare(password, user.password);
         if (!IsLogin) {
             return next(new AppError("invalid Credentials", 400));
-        }
-        if (role !== user.role) {
-            return next(new AppError("Account does not exist with this role", 400));
         }
 
         const tokenData = {

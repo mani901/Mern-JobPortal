@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import JobCard from "@/components/jobs/JobCard";
 import {
   Pagination,
@@ -17,7 +18,10 @@ const JobList = () => {
   const { showError } = useToastNotification();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  const [filters, setFilters] = useState({});
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const q = searchParams.get("q") || "";
+  const [filters, setFilters] = useState(q ? { searchQuery: q } : {});
   const [isSearching, setIsSearching] = useState(false);
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +74,7 @@ const JobList = () => {
   // Fetch jobs when dependencies change
   useEffect(() => {
     fetchJobs();
-  }, [currentPage, itemsPerPage, JSON.stringify(filters)]);
+  }, [currentPage, itemsPerPage, JSON.stringify(filters), q]);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= pagination.pages) {

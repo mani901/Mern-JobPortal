@@ -1,8 +1,18 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
 const HeroSection = () => {
+  const [query, setQuery] = useState("");
+  const navigate = useNavigate();
+
+  const runSearch = () => {
+    const trimmed = query.trim();
+    navigate(trimmed ? `/jobs?q=${encodeURIComponent(trimmed)}` : "/jobs");
+  };
+
   return (
     <section className="bg-gray-50 py-16 md:py-24">
       <div className="container mx-auto px-4">
@@ -18,16 +28,20 @@ const HeroSection = () => {
           {/* Search Bar */}
           <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto">
             <div className="relative flex-1">
-              <Search className="absolute (left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
               <Input
                 type="text"
                 placeholder="Search jobs by title or location"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && runSearch()}
                 className="pl-9 bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 h-10 rounded-md"
               />
             </div>
             <Button
               size="lg"
               className="bg-green-900 hover:bg-green-700 text-white font-medium h-10"
+              onClick={runSearch}
             >
               Search
             </Button>

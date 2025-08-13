@@ -25,6 +25,7 @@ import JobsPosted from "@/components/jobs/recruiter/JobsPosted";
 import JobApplicantsPage from "@/pages/jobs/JobApplicantsPage";
 import UserProfile from "@/pages/user/UserProfile";
 import CompanyDetails from "@/pages/companies/CompanyDetails";
+import About from "@/pages/About";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           <Route path="/jobs" element={<JobList />} />
           <Route path="/jobs/:jobId" element={<JobDetails />} />
           <Route path="/companies/:id" element={<CompanyProfile />} />
+          <Route path="/about" element={<About />} />
           {/* Public routes - only for non-authenticated users */}
           <Route
             path="/login"

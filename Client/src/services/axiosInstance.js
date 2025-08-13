@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: "https://mern-jobportal-production.up.railway.app",
   withCredentials: true,
 });
 
